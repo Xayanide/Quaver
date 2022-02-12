@@ -91,6 +91,32 @@ module.exports = {
 		const trackLength = player.queue.current.length;
 		const duration = msToTime(trackLength);
 		const durationString = msToTimeString(duration, true);
+		// Hours, minutes, seconds
+		if (!interaction.options.getString('timestamp') && !interaction.options.getString('humantime') && interaction.options.getInteger('hours') + interaction.options.getInteger('minutes') + interaction.options.getInteger('seconds')) {
+			console.log('Hours, minutes, seconds');
+			if (options > trackLength) {
+				await interaction.reply({
+					embeds: [
+						new MessageEmbed()
+							.setDescription(getLocale(guildData.get(`${interaction.guildId}.locale`) ?? defaultLocale, 'CMD_SEEK_INVALID_TIMESTAMP', durationString))
+							.setColor('DARK_RED'),
+					],
+					ephemeral: true,
+				});
+				return;
+			}
+			const seek = msToTime(options);
+			const seekString = msToTimeString(seek, true);
+			await player.seek(options);
+			await interaction.reply({
+				embeds: [
+					new MessageEmbed()
+						.setDescription(getLocale(guildData.get(`${interaction.guildId}.locale`) ?? defaultLocale, 'CMD_SEEK_SUCCESS', seekString, durationString))
+						.setColor(defaultColor),
+				],
+			});
+			return;
+		}
 		// Timestamp has ':'
 		if (interaction.options.getString('timestamp') !== null) {
 			console.log('Timestamp has format');
@@ -368,32 +394,6 @@ module.exports = {
 				});
 				return;
 			}
-		}
-		// Hours, minutes, seconds
-		if (!interaction.options.getString('timestamp') && !interaction.options.getString('humantime') && interaction.options.getInteger('hours') + interaction.options.getInteger('minutes') + interaction.options.getInteger('seconds')) {
-			console.log('Hours, minutes, seconds');
-			if (options > trackLength) {
-				await interaction.reply({
-					embeds: [
-						new MessageEmbed()
-							.setDescription(getLocale(guildData.get(`${interaction.guildId}.locale`) ?? defaultLocale, 'CMD_SEEK_INVALID_TIMESTAMP', durationString))
-							.setColor('DARK_RED'),
-					],
-					ephemeral: true,
-				});
-				return;
-			}
-			const seek = msToTime(options);
-			const seekString = msToTimeString(seek, true);
-			await player.seek(options);
-			await interaction.reply({
-				embeds: [
-					new MessageEmbed()
-						.setDescription(getLocale(guildData.get(`${interaction.guildId}.locale`) ?? defaultLocale, 'CMD_SEEK_SUCCESS', seekString, durationString))
-						.setColor(defaultColor),
-				],
-			});
-			return;
 		}
 	},
 };
