@@ -55,19 +55,13 @@ module.exports = {
 			return;
 		}
 		let split = timestamp.split(':');
-		if (split.length > 3) {
-			return;
-		}
+		if (split.length > 3) { return; }
 		split = split.reverse();
 		const seconds = parseInt(split[0]) ;
 		let minutes = 0;
 		let hours = 0;
-		if (split[1]) {
-			minutes = parseInt(split[1]);
-		}
-		if (split[2]) {
-			hours = parseInt(split[2]) ;
-		}
+		if (split[1]) { minutes = parseInt(split[1]); }
+		if (split[2]) { hours = parseInt(split[2]); }
 		const time = hours * 3600000 + minutes * 60000 + seconds * 1000;
 		if (isNaN(time)) {
 			await interaction.reply({

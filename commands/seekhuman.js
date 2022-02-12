@@ -53,8 +53,7 @@ module.exports = {
 			});
 			return;
 		}
-		const toMS = ts => ts.match(/\d+\s?\w/g).reduce((acc, cur) => acc + (parseInt(cur) || 0) * 1000 * (cur.slice(-1) === 'h' ? 3600 : cur.slice(-1) === 'm' ? 60 : 1), 0);
-		const ms = toMS(interaction.options.getString('time') ?? 0);
+		const ms = interaction.options.getString('time').match(/\d+\s?\w/g).reduce((acc, cur) => acc + (parseInt(cur) || 0) * 1000 * (cur.slice(-1) === 'h' ? 3600 : cur.slice(-1) === 'm' ? 60 : 1), 0);
 		if (isNaN(ms)) {
 			await interaction.reply({
 				embeds: [

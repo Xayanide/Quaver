@@ -95,19 +95,13 @@ module.exports = {
 		if (interaction.options.getString('timestamp') !== null) {
 			console.log('Timestamp has format');
 			let split = interaction.options.getString('timestamp').split(':');
-			if (split.length > 3) {
-				return;
-			}
+			if (split.length > 3) { return; }
 			split = split.reverse();
 			const seconds = parseInt(split[0]) ;
 			let minutes = 0;
 			let hours = 0;
-			if (split[1]) {
-				minutes = parseInt(split[1]);
-			}
-			if (split[2]) {
-				hours = parseInt(split[2]) ;
-			}
+			if (split[1]) { minutes = parseInt(split[1]); }
+			if (split[2]) { hours = parseInt(split[2]); }
 			const stamp = hours * 3600000 + minutes * 60000 + seconds * 1000;
 			// Timestamp NaN
 			if (isNaN(stamp)) {
@@ -165,9 +159,8 @@ module.exports = {
 			if (interaction.options.getString('timestamp') && interaction.options.getString('humantime') && interaction.options.getInteger('hours') + interaction.options.getInteger('minutes') + interaction.options.getInteger('seconds')) {
 				console.log('All options (Timestamp + Humantime + Options)');
 				const human = interaction.options.getString('humantime').match(/\d+\s?\w/g).reduce((acc, cur) => acc + (parseInt(cur) || 0) * 1000 * (cur.slice(-1) === 'h' ? 3600 : cur.slice(-1) === 'm' ? 60 : 1), 0);
-				const stamphumanOptions = stamp + human + options;
-
-				if (stamphumanOptions < 0 || hours > 23 || minutes > 59 || seconds > 59) {
+				const allOptions = stamp + human + options;
+				if (allOptions < 0 || hours > 23 || minutes > 59 || seconds > 59) {
 					await interaction.reply({
 						embeds: [
 							new MessageEmbed()
@@ -178,7 +171,7 @@ module.exports = {
 					});
 					return;
 				}
-				if (stamphumanOptions > trackLength) {
+				if (allOptions > trackLength) {
 					await interaction.reply({
 						embeds: [
 							new MessageEmbed()
@@ -189,9 +182,9 @@ module.exports = {
 					});
 					return;
 				}
-				const seek = msToTime(stamphumanOptions);
+				const seek = msToTime(allOptions);
 				const seekString = msToTimeString(seek, true);
-				await player.seek(stamphumanOptions);
+				await player.seek(allOptions);
 				await interaction.reply({
 					embeds: [
 						new MessageEmbed()
