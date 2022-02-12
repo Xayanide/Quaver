@@ -76,7 +76,7 @@ module.exports = {
 			});
 			return;
 		}
-		if (interaction.options.getString('humantime').match(/\d+\s?\w/g) === null) {
+		if (!interaction.options.getString('timestamp') && interaction.options.getString('humantime').match(/\d+\s?\w/g) === null) {
 			await interaction.reply({
 				embeds: [
 					new MessageEmbed()
