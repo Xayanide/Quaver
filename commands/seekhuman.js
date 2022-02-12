@@ -12,7 +12,7 @@ module.exports = {
 		.addStringOption(option =>
 			option
 				.setName('time')
-				.setDescription(getLocale(defaultLocale, 'CMD_SEEK_OPTION_TIMESTAMP'))),
+				.setDescription(getLocale(defaultLocale, 'CMD_SEEK_DESCRIPTION'))),
 	checks: [checks.GUILD_ONLY, checks.ACTIVE_SESSION, checks.IN_VOICE, checks.IN_SESSION_VOICE],
 	permissions: {
 		user: [],

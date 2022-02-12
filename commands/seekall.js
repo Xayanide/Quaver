@@ -12,11 +12,11 @@ module.exports = {
 		.addStringOption(option =>
 			option
 				.setName('timestamp')
-				.setDescription(getLocale(defaultLocale, 'CMD_SEEK_OPTION_TIMESTAMP')))
+				.setDescription(getLocale(defaultLocale, 'CMD_SEEK_DESCRIPTION')))
 		.addStringOption(option =>
 			option
 				.setName('humantime')
-				.setDescription(getLocale(defaultLocale, 'CMD_SEEK_OPTION_TIMESTAMP')))
+				.setDescription(getLocale(defaultLocale, 'CMD_SEEK_DESCRIPTION')))
 		.addIntegerOption(option =>
 			option
 				.setName('hours')
