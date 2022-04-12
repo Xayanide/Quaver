@@ -24,8 +24,9 @@ module.exports = {
 					format.printf(info => `${info.timestamp} [${info.label}] ${info.level}: ${info.message}`),
 				),
 			}),
-			new transports.File({ filename: 'logs/error.log', level: 'error' }),
-			new transports.File({ filename: 'logs/log.log' }),
+			// Disable transports for now.
+			// new transports.File({ filename: 'logs/error.log', level: 'error' }),
+			// new transports.File({ filename: 'logs/log.log' }),
 		],
 	}),
 };
