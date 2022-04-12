@@ -13,7 +13,7 @@ const { logger, guildData } = require('./shared.js');
 // Start an http server if process is running in a replit environment.
 const { startHttpServer } = require('./httpServer.js');
 if (process.env.REPLIT_DB_URL !== undefined) {
-	logger.info('Replit environment detected. Starting http server.');
+	logger.info({ message: 'Replit environment detected. Starting http server.', label: 'Quaver' });
 	startHttpServer();
 }
 
