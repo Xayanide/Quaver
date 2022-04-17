@@ -22,8 +22,9 @@ async function deployGlobal() {
 		await rest.put(
 			Routes.applicationCommands(clientId),
 			{ body: commands },
-		);
-		console.log('Successfully reloaded application (/) commands globally');
+		).then(() => {
+			console.log('Successfully reloaded application (/) commands globally');
+		});
 	}
 	catch (error) {
 		console.error(error);

@@ -23,8 +23,9 @@ async function deployGuild() {
 		await rest.put(
 			Routes.applicationGuildCommands(clientId, guildId),
 			{ body: commands },
-		);
-		console.log(`Successfully reloaded application (/) commands to ${clientId}`);
+		).then(() => {
+			console.log(`Successfully reloaded application (/) commands to ${clientId}`);
+		});
 	}
 	catch (error) {
 		console.error(error);

@@ -15,8 +15,9 @@ async function deleteGlobal() {
 		const deleteUrl = `${Routes.applicationCommands(clientId)}/${command.id}`;
 		promises.push(rest.delete(deleteUrl));
 	}
-	Promise.all(promises);
-	console.log('Deleted application (/) commands globally');
+	Promise.all(promises).then(() => {
+		console.log('Deleted application (/) commands globally');
+	});
 	return;
 }
 deleteGlobal();

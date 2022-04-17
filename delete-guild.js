@@ -16,8 +16,9 @@ async function deleteGuild() {
 		const deleteUrl = `${Routes.applicationGuildCommands(clientId, guildId)}/${command.id}`;
 		promises.push(rest.delete(deleteUrl));
 	}
-	Promise.all(promises);
-	console.log(`Deleted application (/) commands for ${clientId}`);
+	Promise.all(promises).then(() => {
+		console.log(`Deleted application (/) commands for ${clientId}`);
+	});
 	return;
 }
 deleteGuild();
