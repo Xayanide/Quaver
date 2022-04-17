@@ -49,28 +49,34 @@ module.exports = {
 				}
 			}
 			if (failedChecks.length > 0) {
-				logger.info({ message: `[${interaction.guildId ? `G ${interaction.guildId} | ` : ''}U ${interaction.user.id}] Command ${interaction.commandName} failed ${failedChecks.length} checks`, label: 'Quaver' });
+				logger.info({ message: `[${interaction.guildId ? `G ${interaction.guildId} | ` : ''}U ${interaction.user.id}] Command ${interaction.commandName} failed ${failedChecks.length} check(s)`, label: 'Quaver' });
 				await interaction.replyHandler.localeError(failedChecks[0]);
 				return;
 			}
 			const failedPermissions = { user: [], bot: [] };
-			for (const perm of command.permissions.user) {
-				if (!interaction.channel.permissionsFor(interaction.member).has(perm)) {
-					failedPermissions.user.push(perm);
+			if (interaction.guildId) {
+				for (const perm of command.permissions.user) {
+					if (!interaction.channel.permissionsFor(interaction.member).has(perm)) {
+						failedPermissions.user.push(perm);
+					}
+				}
+				for (const perm of ['VIEW_CHANNEL', 'SEND_MESSAGES', ...command.permissions.bot]) {
+					if (!interaction.channel.permissionsFor(interaction.client.user.id).has(perm)) {
+						failedPermissions.bot.push(perm);
+					}
 				}
 			}
-			for (const perm of ['VIEW_CHANNEL', 'SEND_MESSAGES', ...command.permissions.bot]) {
-				if (!interaction.channel.permissionsFor(interaction.client.user.id).has(perm)) {
-					failedPermissions.bot.push(perm);
-				}
+			else {
+				failedPermissions.user = command.permissions.user;
+				failedPermissions.bot = command.permissions.bot;
 			}
 			if (failedPermissions.user.length > 0) {
-				logger.info({ message: `[${interaction.guildId ? `G ${interaction.guildId} | ` : ''}U ${interaction.user.id}] Command ${interaction.commandName} failed ${failedPermissions.user.length} user permission checks`, label: 'Quaver' });
+				logger.info({ message: `[${interaction.guildId ? `G ${interaction.guildId} | ` : ''}U ${interaction.user.id}] Command ${interaction.commandName} failed ${failedPermissions.user.length} user permission check(s)`, label: 'Quaver' });
 				await interaction.replyHandler.localeError('DISCORD_USER_MISSING_PERMISSIONS', {}, failedPermissions.user.map(perm => '`' + perm + '`').join(' '));
 				return;
 			}
 			if (failedPermissions.bot.length > 0) {
-				logger.info({ message: `[${interaction.guildId ? `G ${interaction.guildId} | ` : ''}U ${interaction.user.id}] Command ${interaction.commandName} failed ${failedPermissions.bot.length} bot permission checks`, label: 'Quaver' });
+				logger.info({ message: `[${interaction.guildId ? `G ${interaction.guildId} | ` : ''}U ${interaction.user.id}] Command ${interaction.commandName} failed ${failedPermissions.bot.length} bot permission check(s)`, label: 'Quaver' });
 				await interaction.replyHandler.localeError('DISCORD_BOT_MISSING_PERMISSIONS', {}, failedPermissions.bot.map(perm => '`' + perm + '`').join(' '));
 				return;
 			}
@@ -112,7 +118,7 @@ module.exports = {
 							const durationString = track.isStream ? '∞' : msToTimeString(duration, true);
 							return `\`${(firstIndex + index).toString().padStart(largestIndexSize, ' ')}.\` **[${track.title}](${track.uri})** \`[${durationString}]\` <@${track.requester}>`;
 						}).join('\n'))
-						.setFooter({ text: getLocale(guildData.get(`${interaction.guildId}.locale`) ?? defaultLocale, 'PAGE', page, pages.length) });
+						.setFooter({ text: getLocale(guildData.get(`${interaction.guildId}.locale`) ?? defaultLocale, 'MISC_PAGE', page, pages.length) });
 					original.components[0].components = [];
 					original.components[0].components[0] = new MessageButton()
 						.setCustomId(`queue_${page - 1}`)
@@ -128,7 +134,7 @@ module.exports = {
 						.setCustomId(`queue_${page}`)
 						.setEmoji('🔁')
 						.setStyle('SECONDARY')
-						.setLabel(getLocale(guildData.get(`${interaction.guildId}.locale`) ?? defaultLocale, 'REFRESH')),
+						.setLabel(getLocale(guildData.get(`${interaction.guildId}.locale`) ?? defaultLocale, 'MISC_REFRESH')),
 					interaction.update({
 						embeds: original.embeds,
 						components: original.components,
@@ -274,7 +280,7 @@ module.exports = {
 							new MessageEmbed()
 								.setDescription(msg)
 								.setColor(defaultColor)
-								.setFooter({ text: started ? `${getLocale(guildData.get(`${interaction.guildId}.locale`) ?? defaultLocale, 'POSITION')}: ${firstPosition}${endPosition !== firstPosition ? ` - ${endPosition}` : ''}` : '' }),
+								.setFooter({ text: started ? `${getLocale(guildData.get(`${interaction.guildId}.locale`) ?? defaultLocale, 'MISC_POSITION')}: ${firstPosition}${endPosition !== firstPosition ? ` - ${endPosition}` : ''}` : '' }),
 						],
 						components: [],
 					});
