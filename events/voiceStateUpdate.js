@@ -14,17 +14,38 @@ module.exports = {
 		// Quaver voiceStateUpdate
 		if (oldState.member.user.id === bot.user.id) {
 			// just the suppress state changed
-			if ((oldState.suppress !== newState.suppress || oldState.serverMute !== newState.serverMute || oldState.serverDeaf !== newState.serverDeaf) && oldState.channelId === newState.channelId) {
-				return;
-			}
+			if ((oldState.suppress !== newState.suppress || oldState.serverMute !== newState.serverMute || oldState.serverDeaf !== newState.serverDeaf) && oldState.channelId === newState.channelId) return;
 			// disconnected
 			if (!newState.channelId || !newState.channel?.members.find(m => m.user.id === bot.user.id)) {
 				logger.info({ message: `[G ${player.guildId}] Cleaning up`, label: 'Quaver' });
 				if (guildData.get(`${player.guildId}.always.enabled`)) {
 					guildData.set(`${player.guildId}.always.enabled`, false);
 				}
-				await player.musicHandler.locale('MUSIC_FORCED');
-				player.musicHandler.disconnect();
+				const success = await player.musicHandler.locale('MUSIC_FORCED');
+				await player.musicHandler.disconnect();
+				// channel was a stage channel, and bot was unsuppressed
+				if (oldState.channel.type === 'GUILD_STAGE_VOICE' && !oldState.suppress) {
+					// check for connect, speak permission for voice channel
+					const permissions = bot.guilds.cache.get(guild.id).channels.cache.get(oldState.channelId).permissionsFor(bot.user.id);
+					if (!permissions.has(['VIEW_CHANNEL', 'CONNECT', 'SPEAK'])) {
+						await player.musicHandler.locale('DISCORD_BOT_MISSING_PERMISSIONS_BASIC');
+						return;
+					}
+					if (!permissions.has(Permissions.STAGE_MODERATOR)) {
+						await player.musicHandler.locale('DISCORD_BOT_MISSING_PERMISSIONS_STAGE');
+						return;
+					}
+					// probably don't have perms anyway, let's not bother ending the stage
+					if (!success) return;
+					if (oldState.channel.stageInstance?.topic === getLocale(guildData.get(`${player.guildId}.locale`) ?? defaultLocale, 'MUSIC_STAGE_TOPIC')) {
+						try {
+							await oldState.channel.stageInstance.delete();
+						}
+						catch (err) {
+							logger.error({ message: `${err.message}\n${err.stack}`, label: 'Quaver' });
+						}
+					}
+				}
 				return;
 			}
 			// channel is a voice channel
@@ -33,7 +54,7 @@ module.exports = {
 				const permissions = bot.guilds.cache.get(guild.id).channels.cache.get(newState.channelId).permissionsFor(bot.user.id);
 				if (!permissions.has(['VIEW_CHANNEL', 'CONNECT', 'SPEAK'])) {
 					await player.musicHandler.locale('DISCORD_BOT_MISSING_PERMISSIONS_BASIC');
-					player.musicHandler.disconnect();
+					await player.musicHandler.disconnect();
 					return;
 				}
 				if (guildData.get(`${player.guildId}.always.enabled`) && guildData.get(`${player.guildId}.always.channel`) !== newState.channelId) {
@@ -47,7 +68,7 @@ module.exports = {
 				// check for connect, speak permission for stage channel
 				if (!permissions.has(['VIEW_CHANNEL', 'CONNECT', 'SPEAK'])) {
 					await player.musicHandler.locale('DISCORD_BOT_MISSING_PERMISSIONS_BASIC');
-					player.musicHandler.disconnect();
+					await player.musicHandler.disconnect();
 					return;
 				}
 				if (!permissions.has(Permissions.STAGE_MODERATOR)) {
@@ -55,7 +76,7 @@ module.exports = {
 						guildData.set(`${player.guildId}.always.enabled`, false);
 					}
 					await player.musicHandler.locale('MUSIC_FORCED_STAGE');
-					player.musicHandler.disconnect();
+					await player.musicHandler.disconnect();
 					return;
 				}
 				await newState.setSuppressed(false);
@@ -81,7 +102,7 @@ module.exports = {
 					}
 					logger.info({ message: `[G ${player.guildId}] Disconnecting (alone)`, label: 'Quaver' });
 					await player.musicHandler.locale('MUSIC_ALONE_MOVED');
-					player.musicHandler.disconnect();
+					await player.musicHandler.disconnect();
 					return;
 				}
 				// avoid pauseTimeout if 24/7 is enabled
@@ -134,7 +155,7 @@ module.exports = {
 		if (!player.queue.current || !player.playing && !player.paused) {
 			logger.info({ message: `[G ${player.guildId}] Disconnecting (alone)`, label: 'Quaver' });
 			player.musicHandler.locale('MUSIC_ALONE');
-			player.musicHandler.disconnect();
+			await player.musicHandler.disconnect();
 			return;
 		}
 		await player.pause();

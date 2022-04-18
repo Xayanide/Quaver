@@ -38,6 +38,10 @@ module.exports = {
 			await interaction.replyHandler.localeError('DISCORD_BOT_MISSING_PERMISSIONS_STAGE');
 			return;
 		}
+		if (interaction.guild.members.cache.get(interaction.client.user.id).isCommunicationDisabled()) {
+			await interaction.replyHandler.localeError('DISCORD_BOT_TIMED_OUT');
+			return;
+		}
 
 		await interaction.deferReply();
 		const query = interaction.options.getString('query'), insert = interaction.options.getBoolean('insert');
@@ -95,7 +99,7 @@ module.exports = {
 			// that kid left while we were busy bruh
 			if (!interaction.member.voice.channelId) {
 				await interaction.replyHandler.locale('DISCORD_INTERACTION_CANCELED', {}, interaction.user.id);
-				player.musicHandler.disconnect();
+				await player.musicHandler.disconnect();
 				return;
 			}
 			if (interaction.member.voice.channel.type === 'GUILD_STAGE_VOICE' && !interaction.member.voice.channel.stageInstance?.topic) {
@@ -117,7 +121,7 @@ module.exports = {
 		await interaction.replyHandler.locale(msg, { footer: started ? `${getLocale(guildData.get(`${interaction.guildId}.locale`) ?? defaultLocale, 'MISC_POSITION')}: ${firstPosition}${endPosition !== firstPosition ? ` - ${endPosition}` : ''}` : '' }, ...extras);
 		if (!started) { await player.queue.start(); }
 		const state = interaction.guild.members.cache.get(interaction.client.user.id).voice;
-		if (state.channel.type === 'GUILD_STAGE_VOICE' && state.suppress) {
+		if (interaction.member.voice.channel.type === 'GUILD_STAGE_VOICE' && state.suppress) {
 			await state.setSuppressed(false);
 		}
 	},
