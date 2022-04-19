@@ -147,8 +147,8 @@ module.exports = {
 				}
 				// Channel is a STAGE channel
 				if (newState.channel.type === 'GUILD_STAGE_VOICE') {
-					const permissions = bot.guilds.cache.get(guild.id).channels.cache.get(newState.channelId).permissionsFor(bot.user.id);
 					// Check for permissions
+					const permissions = bot.guilds.cache.get(guild.id).channels.cache.get(newState.channelId).permissionsFor(bot.user.id);
 					if (!permissions.has(['VIEW_CHANNEL', 'CONNECT', 'SPEAK'])) {
 						await player.musicHandler.locale('DISCORD_BOT_MISSING_PERMISSIONS_BASIC');
 						await player.musicHandler.disconnect();
@@ -221,8 +221,8 @@ module.exports = {
 							return console.log('Quaver suppress states 1');
 						}
 					}
-					const permissions = bot.guilds.cache.get(guild.id).channels.cache.get(newState.channelId).permissionsFor(bot.user.id);
 					// Check for connect, speak permission for stage channel
+					const permissions = bot.guilds.cache.get(guild.id).channels.cache.get(newState.channelId).permissionsFor(bot.user.id);
 					if (!permissions.has(['VIEW_CHANNEL', 'CONNECT', 'SPEAK'])) {
 						await player.musicHandler.locale('DISCORD_BOT_MISSING_PERMISSIONS_BASIC');
 						await player.musicHandler.disconnect();
@@ -271,8 +271,8 @@ module.exports = {
 							return console.log('Quaver suppress states 2');
 						}
 					}
-					const permissions = bot.guilds.cache.get(guild.id).channels.cache.get(newState.channelId).permissionsFor(bot.user.id);
 					// Check for connect, speak permission for stage channel
+					const permissions = bot.guilds.cache.get(guild.id).channels.cache.get(newState.channelId).permissionsFor(bot.user.id);
 					if (!permissions.has(['VIEW_CHANNEL', 'CONNECT', 'SPEAK'])) {
 						await player.musicHandler.locale('DISCORD_BOT_MISSING_PERMISSIONS_BASIC');
 						await player.musicHandler.disconnect();
