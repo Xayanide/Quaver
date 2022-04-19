@@ -73,13 +73,15 @@ module.exports = {
 					// Bot was in the channel
 					if (oldVoiceChannel.members.has(bot.user.id)) {
 						// Nothing is playing, has people and 24/7 was disabled.
-						if (oldVoiceChannel.members.filter(m => !m.user.bot).size >= 1 && (!player.queue.current || !player.playing && !player.paused) && !guildData.get(`${player.guildId}.always.enabled`)) {
+						if ((!player.queue.current || !player.playing && !player.paused) && !guildData.get(`${player.guildId}.always.enabled`)) {
 							logger.info({ message: `[G ${player.guildId}] Cleaning up`, label: 'Human' });
 							await player.musicHandler.disconnect();
 							return console.log('Human left a VOICE channel, no playing, 24/7 false');
 						}
 						// There was a track playing, has people and 24/7 was disabled.
-						if (oldVoiceChannel.members.filter(m => !m.user.bot).size >= 1 && !guildData.get(`${player.guildId}.always.enabled`)) {
+						if (!guildData.get(`${player.guildId}.always.enabled`)) {
+							// There are still people, do not set pause time out twice
+							if (oldVoiceChannel.members.filter(m => !m.user.bot).size >= 1) return;
 							// Set pause Timeout
 							await player.pause();
 							logger.info({ message: `[G ${player.guildId}] Setting pause timeout`, label: 'Quaver' });
@@ -103,7 +105,7 @@ module.exports = {
 						if ((!player.queue.current || !player.playing && !player.paused) && !guildData.get(`${player.guildId}.always.enabled`)) {
 							logger.info({ message: `[G ${player.guildId}] Cleaning up`, label: 'Human' });
 							await player.musicHandler.disconnect();
-							return console.log('Human left a VOICE channel, no playing, 24/7 false');
+							return console.log('Human left a STAGE channel, no playing, 24/7 false');
 						}
 						// There was a track playing and 24/7 was disabled.
 						if (!guildData.get(`${player.guildId}.always.enabled`)) {
