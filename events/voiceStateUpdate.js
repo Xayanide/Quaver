@@ -16,7 +16,7 @@ module.exports = {
 		const player = bot.music.players.get(guild.id);
 
 		/**
-		 * Someone left a channel
+		 * Someone left
 		 */
 		if (oldState.channelId && newState.channelId === null) {
 			// Quaver left
@@ -130,7 +130,7 @@ module.exports = {
 		}
 
 		/**
-		 * Someone joined a channel
+		 * Someone joined
 		 */
 		if (newState.channelId && oldState.channelId === null) {
 			// Quaver joined
@@ -268,7 +268,7 @@ module.exports = {
 						}
 					}
 					const permissions = bot.guilds.cache.get(guild.id).channels.cache.get(newState.channelId).permissionsFor(bot.user.id);
-					// check for connect, speak permission for stage channel
+					// heck for connect, speak permission for stage channel
 					if (!permissions.has(['VIEW_CHANNEL', 'CONNECT', 'SPEAK'])) {
 						await player.musicHandler.locale('DISCORD_BOT_MISSING_PERMISSIONS_BASIC');
 						await player.musicHandler.disconnect();
