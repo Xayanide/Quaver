@@ -75,6 +75,7 @@ module.exports = {
 						// Nothing is playing, has people and 24/7 was disabled.
 						if ((!player.queue.current || !player.playing && !player.paused) && !guildData.get(`${player.guildId}.always.enabled`)) {
 							logger.info({ message: `[G ${player.guildId}] Cleaning up`, label: 'Human' });
+							player.musicHandler.locale('MUSIC_ALONE');
 							await player.musicHandler.disconnect();
 							return console.log('Human left a VOICE channel, no playing, 24/7 false');
 						}
@@ -104,6 +105,7 @@ module.exports = {
 						// Nothing is playing and 24/7 was disabled.
 						if ((!player.queue.current || !player.playing && !player.paused) && !guildData.get(`${player.guildId}.always.enabled`)) {
 							logger.info({ message: `[G ${player.guildId}] Cleaning up`, label: 'Human' });
+							player.musicHandler.locale('MUSIC_ALONE');
 							await player.musicHandler.disconnect();
 							return console.log('Human left a STAGE channel, no playing, 24/7 false');
 						}
