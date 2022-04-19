@@ -8,6 +8,10 @@ module.exports = {
 	name: 'voiceStateUpdate',
 	once: false,
 	async execute(oldState, newState) {
+		/**
+		 * WARNING:
+		 * Repetitive code ahead.
+		 */
 		const guild = oldState.guild;
 		const player = bot.music.players.get(guild.id);
 
