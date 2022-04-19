@@ -218,7 +218,7 @@ module.exports = {
 						}
 					}
 					const permissions = bot.guilds.cache.get(guild.id).channels.cache.get(newState.channelId).permissionsFor(bot.user.id);
-					// check for connect, speak permission for stage channel
+					// Check for connect, speak permission for stage channel
 					if (!permissions.has(['VIEW_CHANNEL', 'CONNECT', 'SPEAK'])) {
 						await player.musicHandler.locale('DISCORD_BOT_MISSING_PERMISSIONS_BASIC');
 						await player.musicHandler.disconnect();
@@ -268,7 +268,7 @@ module.exports = {
 						}
 					}
 					const permissions = bot.guilds.cache.get(guild.id).channels.cache.get(newState.channelId).permissionsFor(bot.user.id);
-					// heck for connect, speak permission for stage channel
+					// Check for connect, speak permission for stage channel
 					if (!permissions.has(['VIEW_CHANNEL', 'CONNECT', 'SPEAK'])) {
 						await player.musicHandler.locale('DISCORD_BOT_MISSING_PERMISSIONS_BASIC');
 						await player.musicHandler.disconnect();
