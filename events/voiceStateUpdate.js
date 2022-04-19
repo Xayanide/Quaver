@@ -121,7 +121,7 @@ module.exports = {
 		}
 
 		/**
-		 * Someone moved to a different channel
+		 * Someone moved
 		 */
 		if (newState.channelId && oldState.channelId) {
 			// Quaver moved
