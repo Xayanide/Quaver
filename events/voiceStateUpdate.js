@@ -8,42 +8,45 @@ module.exports = {
 	name: 'voiceStateUpdate',
 	once: false,
 	async execute(oldState, newState) {
-		/**
-		 * WARNING:
-		 * Repetitive code ahead.
-		 * https://www.youtube.com/watch?v=UnIhRpIT7nc
-		 */
 		const guild = oldState.guild;
 		const player = bot.music.players.get(guild.id);
+
+		/**
+		 * WARNING:
+		 * Repetitive code ahead
+		 * https://www.youtube.com/watch?v=UnIhRpIT7nc
+		 */
 
 		/**
 		 * Someone left
 		 */
 		if (oldState.channelId && newState.channelId === null) {
-			// Quaver left
+			/**
+			 * Quaver left
+			 */
 			if (oldState.member.user.id === bot.user.id) {
-				// There was no player
+				// Quaver left but no player
 				if (!player) return console.log('Quaver left, but no player');
-				// Channel was a VOICE channel
+				// Quaver left in VOICE
 				if (oldState.channel.type === 'GUILD_VOICE') {
-					logger.info({ message: `[G ${player.guildId}] Cleaning up`, label: 'Quaver' });
+					logger.info({ message: `[G ${player.guildId}] Cleaning up`, label: 'Quaver Leave' });
 					if (guildData.get(`${player.guildId}.always.enabled`)) {
 						guildData.set(`${player.guildId}.always.enabled`, false);
 					}
 					await player.musicHandler.disconnect();
 					return console.log('Quaver left a VOICE channel');
 				}
-				// Channel was a STAGE channel
+				// Quaver left in STAGE
 				const success = await player.musicHandler.locale('MUSIC_FORCED');
 				if (oldState.channel.type === 'GUILD_STAGE_VOICE') {
-					logger.info({ message: `[G ${player.guildId}] Cleaning up`, label: 'Quaver' });
+					logger.info({ message: `[G ${player.guildId}] Cleaning up`, label: 'Quaver Leave' });
 					if (guildData.get(`${player.guildId}.always.enabled`)) {
 						guildData.set(`${player.guildId}.always.enabled`, false);
 					}
 					await player.musicHandler.disconnect();
-					// Check for permissions
+					// Check for permissions for STAGE
 					const permissions = bot.guilds.cache.get(guild.id)?.channels.cache.get(oldState.channelId).permissionsFor(bot.user.id);
-					if (!permissions?.has(['VIEW_CHANNEL', 'CONNECT', 'SPEAK'])) {
+					if (!permissions.has(['VIEW_CHANNEL', 'CONNECT', 'SPEAK'])) {
 						await player.musicHandler.locale('DISCORD_BOT_MISSING_PERMISSIONS_BASIC');
 						return;
 					}
@@ -51,9 +54,8 @@ module.exports = {
 						await player.musicHandler.locale('DISCORD_BOT_MISSING_PERMISSIONS_STAGE');
 						return;
 					}
-					// Probably no permissions from guildDelete, don't even bother ending the stage.
+					// Probably no permissions from guildDelete, don't even bother ending the stage
 					if (!success) return;
-					// Channel had a STAGE instance
 					if (oldState.channel.stageInstance?.topic === getLocale(guildData.get(`${player.guildId}.locale`) ?? defaultLocale, 'MUSIC_STAGE_TOPIC')) {
 						try {
 							await oldState.channel.stageInstance.delete();
@@ -66,24 +68,29 @@ module.exports = {
 				}
 				return console.log('Quaver left a channel');
 			}
-			// Human left
+			/**
+			 * Human left
+			 */
 			if (!oldState.member.user.bot) {
+				// Human left but no player
 				if (!player) return console.log('Human left, but no player');
 				const oldVoiceChannel = bot.guilds.cache.get(guild.id).channels.cache.get(oldState.channelId);
-				// Left from VOICE
+				// Human left in VOICE
 				if (oldVoiceChannel.type === 'GUILD_VOICE') {
-					// Bot was in the channel
+					// Bot was in VOICE
 					if (oldVoiceChannel.members.has(bot.user.id)) {
-						// Nothing is playing, has people and 24/7 was disabled.
-						if ((!player.queue.current || !player.playing && !player.paused) && !guildData.get(`${player.guildId}.always.enabled`)) {
+						// 24/7 is enabled, do not set pauseTimeout
+						if (guildData.get(`${player.guildId}.always.enabled`)) return;
+						// Nothing is playing, and there no humans
+						if (!player.queue.current || !player.playing && !player.paused) {
 							logger.info({ message: `[G ${player.guildId}] Cleaning up`, label: 'Human' });
 							player.musicHandler.locale('MUSIC_ALONE');
 							await player.musicHandler.disconnect();
 							return console.log('Human left a VOICE channel, no playing, 24/7 false');
 						}
-						// There was a track playing, has people and 24/7 was disabled.
-						if (!guildData.get(`${player.guildId}.always.enabled`)) {
-							// Set pause Timeout
+						// There was a track playing and there is no pauseTimeout
+						if	(!player.pauseTimeout && (player.queue.current || player.playing && player.paused)) {
+							// Set pauseTimeout
 							await player.pause();
 							logger.info({ message: `[G ${player.guildId}] Setting pause timeout`, label: 'Quaver' });
 							if (player.pauseTimeout) {
@@ -98,23 +105,22 @@ module.exports = {
 						}
 					}
 				}
-				// Left from STAGE
+				// Human left in STAGE
 				if (oldVoiceChannel.type === 'GUILD_STAGE_VOICE') {
-					// Bot was in the channel
+					// Bot was in STAGE
 					if (oldVoiceChannel.members.has(bot.user.id)) {
-						// Nothing is playing and 24/7 was disabled.
-						if ((!player.queue.current || !player.playing && !player.paused) && !guildData.get(`${player.guildId}.always.enabled`)) {
-							logger.info({ message: `[G ${player.guildId}] Cleaning up`, label: 'Human' });
+						// 24/7 is enabled, do not set pauseTimeOut
+						if (guildData.get(`${player.guildId}.always.enabled`)) return;
+						// Nothing is playing, and there no humans
+						if (!player.queue.current || !player.playing && !player.paused) {
+							logger.info({ message: `[G ${player.guildId}] Cleaning up`, label: 'Quaver' });
 							player.musicHandler.locale('MUSIC_ALONE');
 							await player.musicHandler.disconnect();
 							return console.log('Human left a STAGE channel, no playing, 24/7 false');
 						}
-						// There was a track playing and 24/7 was disabled.
-						if (!guildData.get(`${player.guildId}.always.enabled`)) {
-							// There are still people, do not set pause time out twice
-							if (oldVoiceChannel.members.filter(m => !m.user.bot).size >= 1) return;
-
-							// Set pause Timeout
+						// There was a track playing and there is no pauseTimeout
+						if	(!player.pauseTimeout && (player.queue.current || player.playing && player.paused)) {
+						// Set pauseTimeout
 							await player.pause();
 							logger.info({ message: `[G ${player.guildId}] Setting pause timeout`, label: 'Quaver' });
 							if (player.pauseTimeout) {
@@ -129,7 +135,7 @@ module.exports = {
 						}
 					}
 				}
-				return console.log('Human left');
+				return console.log('Human left a channel');
 			}
 		}
 
@@ -137,23 +143,25 @@ module.exports = {
 		 * Someone joined
 		 */
 		if (newState.channelId && oldState.channelId === null) {
-			// Quaver joined
+			/**
+			 * Quaver joined
+			 */
 			if (newState.member.user.id === bot.user.id) {
-				// There was no player
+				// Quaver joined but no player
 				if (!player) return console.log('Quaver joined, but no player');
-				// Channel is a VOICE channel
+				// Quaver joined in VOICE
 				if (newState.channel.type === 'GUILD_VOICE') {
 					console.log('Quaver joined a VOICE channel');
 				}
-				// Channel is a STAGE channel
+				// Quaver joined in STAGE
 				if (newState.channel.type === 'GUILD_STAGE_VOICE') {
+					// Catch state change
 					if ((newState.suppress !== oldState.suppress || newState.serverMute !== oldState.serverMute || newState.serverDeaf !== oldState.serverDeaf) && oldState.channelId === newState.channelId) {
-						// Quaver suppress states
 						if (oldState.member.user.id === bot.user.id) {
-							return console.log('Quaver suppress states 1');
+							return console.log('Join, state change, STAGE');
 						}
 					}
-					// Check for permissions
+					// Check for permissions for STAGE
 					const permissions = bot.guilds.cache.get(guild.id).channels.cache.get(newState.channelId).permissionsFor(bot.user.id);
 					if (!permissions.has(['VIEW_CHANNEL', 'CONNECT', 'SPEAK'])) {
 						await player.musicHandler.locale('DISCORD_BOT_MISSING_PERMISSIONS_BASIC');
@@ -182,14 +190,18 @@ module.exports = {
 					}
 					return console.log('Quaver joined a STAGE channel');
 				}
+				return console.log('Quaver joined a channel');
 			}
-			// Human joined
+			/**
+			 * Human joined
+			 */
 			if (!newState.member.user.bot) {
-				// There was no player
+				// Human joined but no player
 				if (!player) return console.log('Human joined, but no player');
 				const newVoiceChannel = bot.guilds.cache.get(guild.id).channels.cache.get(newState.channelId);
-				// Joined in VOICE
+				// Human joined in VOICE
 				if (newVoiceChannel.type === 'GUILD_VOICE') {
+					// In Quaver's channel, Quaver has pauseTimeout
 					if (newVoiceChannel.members.has(bot.user.id) && player.pauseTimeout) {
 						player.resume();
 						clearTimeout(player.pauseTimeout);
@@ -197,8 +209,9 @@ module.exports = {
 						await player.musicHandler.locale('MUSIC_ALONE_RESUMED');
 					}
 				}
-				// Joined in STAGE
+				// Human joined in STAGE
 				if (newVoiceChannel.type === 'GUILD_STAGE_VOICE') {
+					// In Quaver's channel, Quaver has pauseTimeout
 					if (newVoiceChannel.members.has(bot.user.id) && player.pauseTimeout) {
 						player.resume();
 						clearTimeout(player.pauseTimeout);
@@ -206,27 +219,29 @@ module.exports = {
 						await player.musicHandler.locale('MUSIC_ALONE_RESUMED');
 					}
 				}
+				return console.log('Human joined a channel');
 			}
-			return console.log('Human joined');
 		}
 
 		/**
 		 * Someone moved
 		 */
 		if (newState.channelId && oldState.channelId) {
-			// Quaver moved
+			/**
+			 * Quaver moved
+			 */
 			if (newState.member.user.id === bot.user.id) {
-				// There was no player
+				// Quaver moved but no player
 				if (!player) return console.log('Quaver moved, but no player');
-				// Moved from VOICE to STAGE
+				// Quaver moved VOICE to STAGE
 				if (oldState.channel.type === 'GUILD_VOICE' && newState.channel.type === 'GUILD_STAGE_VOICE') {
+					// Catch state change
 					if ((oldState.suppress !== newState.suppress || oldState.serverMute !== newState.serverMute || oldState.serverDeaf !== newState.serverDeaf) && newState.channelId === oldState.channelId) {
-						// Quaver suppress states
 						if (oldState.member.user.id === bot.user.id) {
-							return console.log('Quaver suppress states 1');
+							return console.log('Moved, state change, VOICE to STAGE');
 						}
 					}
-					// Check for connect, speak permission for stage channel
+					// Check for permissions for STAGE
 					const permissions = bot.guilds.cache.get(guild.id).channels.cache.get(newState.channelId).permissionsFor(bot.user.id);
 					if (!permissions.has(['VIEW_CHANNEL', 'CONNECT', 'SPEAK'])) {
 						await player.musicHandler.locale('DISCORD_BOT_MISSING_PERMISSIONS_BASIC');
@@ -253,9 +268,11 @@ module.exports = {
 					if (guildData.get(`${player.guildId}.always.enabled`) && guildData.get(`${player.guildId}.always.channel`) !== newState.channelId) {
 						guildData.set(`${player.guildId}.always.channel`, newState.channelId);
 					}
-					// Moved to a STAGE channel with no humans and 24/7 is not enabled
-					if (newState.channel.members.filter(m => !m.user.bot).size < 1 && !guildData.get(`${player.guildId}.always.enabled`)) {
-						// The bot is not playing anything - leave immediately
+					// 24/7 is enabled, do not set pauseTimeout
+					if (guildData.get(`${player.guildId}.always.enabled`)) return;
+					// No humans in STAGE
+					if (newState.channel.members.filter(m => !m.user.bot).size < 1) {
+						// Nothing is playing, leave immediately
 						if (!player.queue.current || !player.playing && !player.paused) {
 							if (guildData.get(`${player.guildId}.always.enabled`)) {
 								guildData.set(`${player.guildId}.always.enabled`, false);
@@ -266,8 +283,9 @@ module.exports = {
 							return;
 						}
 					}
-					if (!player.pauseTimeout && (player.queue.current || player.playing && player.paused) && !guildData.get(`${player.guildId}.always.enabled`)) {
-						// The bot was playing something, set pause time out
+					// There was a track playing and there is no pauseTimeout
+					if (!player.pauseTimeout && (player.queue.current || player.playing && player.paused)) {
+						// Set pauseTimeout
 						await player.pause();
 						logger.info({ message: `[G ${player.guildId}] Setting pause timeout`, label: 'Quaver' });
 						player.pauseTimeout = setTimeout(p => {
@@ -280,15 +298,15 @@ module.exports = {
 					}
 					return console.log('Quaver moved from VOICE to STAGE');
 				}
-				// Moved from STAGE to STAGE
+				// Quaver moved STAGE to STAGE
 				if (oldState.channel.type === 'GUILD_STAGE_VOICE' && newState.channel.type === 'GUILD_STAGE_VOICE') {
+					// Catch state change
 					if ((oldState.suppress !== newState.suppress || oldState.serverMute !== newState.serverMute || oldState.serverDeaf !== newState.serverDeaf) && newState.channelId === oldState.channelId) {
-						// Quaver suppress states
 						if (oldState.member.user.id === bot.user.id) {
-							return console.log('Quaver suppress states 2');
+							return console.log('Moved, state change, STAGE to STAGE');
 						}
 					}
-					// Check for connect, speak permission for stage channel
+					// Check for permissions for STAGE
 					const permissions = bot.guilds.cache.get(guild.id).channels.cache.get(newState.channelId).permissionsFor(bot.user.id);
 					if (!permissions.has(['VIEW_CHANNEL', 'CONNECT', 'SPEAK'])) {
 						await player.musicHandler.locale('DISCORD_BOT_MISSING_PERMISSIONS_BASIC');
@@ -315,19 +333,24 @@ module.exports = {
 					if (guildData.get(`${player.guildId}.always.enabled`) && guildData.get(`${player.guildId}.always.channel`) !== newState.channelId) {
 						guildData.set(`${player.guildId}.always.channel`, newState.channelId);
 					}
-					// Moved to a STAGE channel with no humans and 24/7 is not enabled
-					if ((!player.queue.current || !player.playing && !player.paused) && !guildData.get(`${player.guildId}.always.enabled`)) {
-						// The bot is not playing anything - leave immediately
-						if (guildData.get(`${player.guildId}.always.enabled`)) {
-							guildData.set(`${player.guildId}.always.enabled`, false);
+					// 24/7 is enabled, do not set pauseTimeout
+					if (guildData.get(`${player.guildId}.always.enabled`)) return;
+					// No humans in STAGE
+					if (newState.channel.members.filter(m => !m.user.bot).size < 1) {
+						// Nothing is playing, leave immediately
+						if (!player.queue.current || !player.playing && !player.paused) {
+							if (guildData.get(`${player.guildId}.always.enabled`)) {
+								guildData.set(`${player.guildId}.always.enabled`, false);
+							}
+							logger.info({ message: `[G ${player.guildId}] Disconnecting (alone)`, label: 'Quaver' });
+							await player.musicHandler.locale('MUSIC_ALONE_MOVED');
+							await player.musicHandler.disconnect();
+							return;
 						}
-						logger.info({ message: `[G ${player.guildId}] Disconnecting (alone)`, label: 'Quaver' });
-						await player.musicHandler.locale('MUSIC_ALONE_MOVED');
-						await player.musicHandler.disconnect();
-						return;
 					}
-					if (!player.pauseTimeout && (player.queue.current || player.playing && player.paused) && !guildData.get(`${player.guildId}.always.enabled`)) {
-					// The bot was playing something, set pause time out
+					// There was a track playing and there is no pauseTimeout
+					if (!player.pauseTimeout && (player.queue.current || player.playing && player.paused)) {
+						// Set pauseTimeout
 						await player.pause();
 						logger.info({ message: `[G ${player.guildId}] Setting pause timeout`, label: 'Quaver' });
 						player.pauseTimeout = setTimeout(p => {
@@ -340,21 +363,26 @@ module.exports = {
 					}
 					return console.log('Quaver moved from STAGE to STAGE');
 				}
-				// Moved from STAGE to VOICE
+				// Quaver moved STAGE to VOICE
 				if (newState.channel.type === 'GUILD_STAGE_VOICE' && oldState.channel.type === 'GUILD_VOICE') {
-					// Moved to a STAGE channel with no humans and 24/7 is not enabled
-					if ((!player.queue.current || !player.playing && !player.paused) && !guildData.get(`${player.guildId}.always.enabled`)) {
-						// The bot is not playing anything - leave immediately
-						if (guildData.get(`${player.guildId}.always.enabled`)) {
-							guildData.set(`${player.guildId}.always.enabled`, false);
+					// 24/7 is enabled, do not set pauseTimeout
+					if (guildData.get(`${player.guildId}.always.enabled`)) return;
+					// No humans in VOICE
+					if (newState.channel.members.filter(m => !m.user.bot).size < 1) {
+						// Nothing is playing, leave immediately
+						if (!player.queue.current || !player.playing && !player.paused) {
+							if (guildData.get(`${player.guildId}.always.enabled`)) {
+								guildData.set(`${player.guildId}.always.enabled`, false);
+							}
+							logger.info({ message: `[G ${player.guildId}] Disconnecting (alone)`, label: 'Quaver' });
+							await player.musicHandler.locale('MUSIC_ALONE_MOVED');
+							await player.musicHandler.disconnect();
+							return;
 						}
-						logger.info({ message: `[G ${player.guildId}] Disconnecting (alone)`, label: 'Quaver' });
-						await player.musicHandler.locale('MUSIC_ALONE_MOVED');
-						await player.musicHandler.disconnect();
-						return;
 					}
-					if (!player.pauseTimeout && (player.queue.current || player.playing && player.paused) && !guildData.get(`${player.guildId}.always.enabled`)) {
-						// The bot was playing something, set pause time out
+					// There was a track playing and there is no pauseTimeout
+					if (!player.pauseTimeout && (player.queue.current || player.playing && player.paused)) {
+						// Set pauseTimeout
 						await player.pause();
 						logger.info({ message: `[G ${player.guildId}] Setting pause timeout`, label: 'Quaver' });
 						player.pauseTimeout = setTimeout(p => {
@@ -367,11 +395,13 @@ module.exports = {
 					}
 					return console.log('Quaver moved from STAGE to VOICE');
 				}
-				// Moved from VOICE to VOICE
+				// Quaver moved VOICE to VOICE
 				if (newState.channel.type === 'GUILD_VOICE' && oldState.channel.type === 'GUILD_VOICE') {
-					// Moved to a VOICE channel with no humans and 24/7 is not enabled
-					if (newState.channel.members.filter(m => !m.user.bot).size < 1 && !guildData.get(`${player.guildId}.always.enabled`)) {
-						// The bot is not playing anything - leave immediately
+					// 24/7 is enabled, do not set pauseTimeout
+					if (guildData.get(`${player.guildId}.always.enabled`)) return;
+					// No humans in VOICE
+					if (newState.channel.members.filter(m => !m.user.bot).size < 1) {
+						// Nothing is playing, leave immediately
 						if (!player.queue.current || !player.playing && !player.paused) {
 							if (guildData.get(`${player.guildId}.always.enabled`)) {
 								guildData.set(`${player.guildId}.always.enabled`, false);
@@ -382,8 +412,9 @@ module.exports = {
 							return;
 						}
 					}
-					if (!player.pauseTimeout && (player.queue.current || player.playing && player.paused) && !guildData.get(`${player.guildId}.always.enabled`)) {
-						// The bot was playing something, set pause time out
+					// There was a track playing and there is no pauseTimeout
+					if (!player.pauseTimeout && (player.queue.current || player.playing && player.paused)) {
+						// Set pauseTimeout
 						await player.pause();
 						logger.info({ message: `[G ${player.guildId}] Setting pause timeout`, label: 'Quaver' });
 						player.pauseTimeout = setTimeout(p => {
@@ -397,11 +428,16 @@ module.exports = {
 					return console.log('Quaver moved from VOICE to VOICE');
 				}
 			}
-			// Human moved
+			/**
+			 * Human moved
+			 */
 			if (!newState.member.user.bot) {
+				// Human moved but no player
+				if (!player) return console.log('Human moved but, no player');
 				const newVoiceChannel = bot.guilds.cache.get(guild.id).channels.cache.get(newState.channelId);
-				// Joined in VOICE
+				// Human moved to VOICE
 				if (newVoiceChannel.type === 'GUILD_VOICE') {
+					// In Quaver's channel, Quaver has pauseTimeout.
 					if (newVoiceChannel.members.has(bot.user.id) && player.pauseTimeout) {
 						player.resume();
 						clearTimeout(player.pauseTimeout);
@@ -409,8 +445,9 @@ module.exports = {
 						await player.musicHandler.locale('MUSIC_ALONE_RESUMED');
 					}
 				}
-				// Joined in STAGE
+				// Human moved to STAGE
 				if (newVoiceChannel.type === 'GUILD_STAGE_VOICE') {
+					// In Quaver's channel, Quaver has pauseTimeout.
 					if (newVoiceChannel.members.has(bot.user.id) && player.pauseTimeout) {
 						player.resume();
 						clearTimeout(player.pauseTimeout);
