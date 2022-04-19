@@ -30,19 +30,19 @@ module.exports = {
 						guildData.set(`${player.guildId}.always.enabled`, false);
 					}
 					await player.musicHandler.disconnect();
-					console.log('Quaver left a VOICE channel');
+					return console.log('Quaver left a VOICE channel');
 				}
 				// Channel was a STAGE channel
+				const success = await player.musicHandler.locale('MUSIC_FORCED');
 				if (oldState.channel.type === 'GUILD_STAGE_VOICE') {
-					const success = await player.musicHandler.locale('MUSIC_FORCED');
 					logger.info({ message: `[G ${player.guildId}] Cleaning up`, label: 'Quaver' });
 					if (guildData.get(`${player.guildId}.always.enabled`)) {
 						guildData.set(`${player.guildId}.always.enabled`, false);
 					}
 					await player.musicHandler.disconnect();
 					// Check for permissions
-					const permissions = bot.guilds.cache.get(guild.id).channels.cache.get(oldState.channelId).permissionsFor(bot.user.id);
-					if (!permissions.has(['VIEW_CHANNEL', 'CONNECT', 'SPEAK'])) {
+					const permissions = bot.guilds.cache.get(guild.id)?.channels.cache.get(oldState.channelId).permissionsFor(bot.user.id);
+					if (!permissions?.has(['VIEW_CHANNEL', 'CONNECT', 'SPEAK'])) {
 						await player.musicHandler.locale('DISCORD_BOT_MISSING_PERMISSIONS_BASIC');
 						return;
 					}
@@ -63,6 +63,7 @@ module.exports = {
 					}
 					return console.log('Quaver left a STAGE channel');
 				}
+				return console.log('Quaver left a channel');
 			}
 			// Human left
 			if (!oldState.member.user.bot) {
@@ -81,8 +82,6 @@ module.exports = {
 						}
 						// There was a track playing, has people and 24/7 was disabled.
 						if (!guildData.get(`${player.guildId}.always.enabled`)) {
-							// There are still people, do not set pause time out twice
-							if (oldVoiceChannel.members.filter(m => !m.user.bot).size >= 1) return;
 							// Set pause Timeout
 							await player.pause();
 							logger.info({ message: `[G ${player.guildId}] Setting pause timeout`, label: 'Quaver' });
@@ -147,6 +146,12 @@ module.exports = {
 				}
 				// Channel is a STAGE channel
 				if (newState.channel.type === 'GUILD_STAGE_VOICE') {
+					if ((newState.suppress !== oldState.suppress || newState.serverMute !== oldState.serverMute || newState.serverDeaf !== oldState.serverDeaf) && oldState.channelId === newState.channelId) {
+						// Quaver suppress states
+						if (oldState.member.user.id === bot.user.id) {
+							return console.log('Quaver suppress states 1');
+						}
+					}
 					// Check for permissions
 					const permissions = bot.guilds.cache.get(guild.id).channels.cache.get(newState.channelId).permissionsFor(bot.user.id);
 					if (!permissions.has(['VIEW_CHANNEL', 'CONNECT', 'SPEAK'])) {
