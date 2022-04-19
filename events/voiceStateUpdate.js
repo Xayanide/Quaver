@@ -11,6 +11,7 @@ module.exports = {
 		/**
 		 * WARNING:
 		 * Repetitive code ahead.
+		 * https://www.youtube.com/watch?v=UnIhRpIT7nc
 		 */
 		const guild = oldState.guild;
 		const player = bot.music.players.get(guild.id);
@@ -189,25 +190,24 @@ module.exports = {
 				const newVoiceChannel = bot.guilds.cache.get(guild.id).channels.cache.get(newState.channelId);
 				// Joined in VOICE
 				if (newVoiceChannel.type === 'GUILD_VOICE') {
-					if (newVoiceChannel.members.filter(m => !m.user.bot).size >= 1 && player.pauseTimeout) {
+					if (newVoiceChannel.members.has(bot.user.id) && player.pauseTimeout) {
 						player.resume();
 						clearTimeout(player.pauseTimeout);
 						delete player.pauseTimeout;
 						await player.musicHandler.locale('MUSIC_ALONE_RESUMED');
-						return;
 					}
 				}
 				// Joined in STAGE
 				if (newVoiceChannel.type === 'GUILD_STAGE_VOICE') {
-					if (newVoiceChannel.members.filter(m => !m.user.bot).size >= 1 && player.pauseTimeout) {
+					if (newVoiceChannel.members.has(bot.user.id) && player.pauseTimeout) {
 						player.resume();
 						clearTimeout(player.pauseTimeout);
 						delete player.pauseTimeout;
 						await player.musicHandler.locale('MUSIC_ALONE_RESUMED');
-						return;
 					}
 				}
 			}
+			return console.log('Human joined');
 		}
 
 		/**
@@ -266,6 +266,18 @@ module.exports = {
 							return;
 						}
 					}
+					if (!player.pauseTimeout && (player.queue.current || player.playing && player.paused) && !guildData.get(`${player.guildId}.always.enabled`)) {
+						// The bot was playing something, set pause time out
+						await player.pause();
+						logger.info({ message: `[G ${player.guildId}] Setting pause timeout`, label: 'Quaver' });
+						player.pauseTimeout = setTimeout(p => {
+							logger.info({ message: `[G ${p.guildId}] Disconnecting (inactivity)`, label: 'Quaver' });
+							p.musicHandler.locale('MUSIC_INACTIVITY');
+							p.musicHandler.disconnect();
+						}, 300000, player);
+						await player.musicHandler.send(`${getLocale(guildData.get(`${player.guildId}.locale`) ?? defaultLocale, 'MUSIC_ALONE_WARNING')} ${getLocale(guildData.get(`${player.guildId}.locale`) ?? defaultLocale, 'MUSIC_INACTIVITY_WARNING', Math.floor(Date.now() / 1000) + 300)}`, { footer: getLocale(guildData.get(`${player.guildId}.locale`) ?? defaultLocale, 'MUSIC_ALONE_REJOIN') });
+						return;
+					}
 					return console.log('Quaver moved from VOICE to STAGE');
 				}
 				// Moved from STAGE to STAGE
@@ -304,34 +316,54 @@ module.exports = {
 						guildData.set(`${player.guildId}.always.channel`, newState.channelId);
 					}
 					// Moved to a STAGE channel with no humans and 24/7 is not enabled
-					if (newState.channel.members.filter(m => !m.user.bot).size < 1 && !guildData.get(`${player.guildId}.always.enabled`)) {
+					if ((!player.queue.current || !player.playing && !player.paused) && !guildData.get(`${player.guildId}.always.enabled`)) {
 						// The bot is not playing anything - leave immediately
-						if (!player.queue.current || !player.playing && !player.paused) {
-							if (guildData.get(`${player.guildId}.always.enabled`)) {
-								guildData.set(`${player.guildId}.always.enabled`, false);
-							}
-							logger.info({ message: `[G ${player.guildId}] Disconnecting (alone)`, label: 'Quaver' });
-							await player.musicHandler.locale('MUSIC_ALONE_MOVED');
-							await player.musicHandler.disconnect();
-							return;
+						if (guildData.get(`${player.guildId}.always.enabled`)) {
+							guildData.set(`${player.guildId}.always.enabled`, false);
 						}
+						logger.info({ message: `[G ${player.guildId}] Disconnecting (alone)`, label: 'Quaver' });
+						await player.musicHandler.locale('MUSIC_ALONE_MOVED');
+						await player.musicHandler.disconnect();
+						return;
+					}
+					if (!player.pauseTimeout && (player.queue.current || player.playing && player.paused) && !guildData.get(`${player.guildId}.always.enabled`)) {
+					// The bot was playing something, set pause time out
+						await player.pause();
+						logger.info({ message: `[G ${player.guildId}] Setting pause timeout`, label: 'Quaver' });
+						player.pauseTimeout = setTimeout(p => {
+							logger.info({ message: `[G ${p.guildId}] Disconnecting (inactivity)`, label: 'Quaver' });
+							p.musicHandler.locale('MUSIC_INACTIVITY');
+							p.musicHandler.disconnect();
+						}, 300000, player);
+						await player.musicHandler.send(`${getLocale(guildData.get(`${player.guildId}.locale`) ?? defaultLocale, 'MUSIC_ALONE_WARNING')} ${getLocale(guildData.get(`${player.guildId}.locale`) ?? defaultLocale, 'MUSIC_INACTIVITY_WARNING', Math.floor(Date.now() / 1000) + 300)}`, { footer: getLocale(guildData.get(`${player.guildId}.locale`) ?? defaultLocale, 'MUSIC_ALONE_REJOIN') });
+						return;
 					}
 					return console.log('Quaver moved from STAGE to STAGE');
 				}
 				// Moved from STAGE to VOICE
 				if (newState.channel.type === 'GUILD_STAGE_VOICE' && oldState.channel.type === 'GUILD_VOICE') {
-					// Moved to a VOICE channel with no humans and 24/7 is not enabled
-					if (newState.channel.members.filter(m => !m.user.bot).size < 1 && !guildData.get(`${player.guildId}.always.enabled`)) {
+					// Moved to a STAGE channel with no humans and 24/7 is not enabled
+					if ((!player.queue.current || !player.playing && !player.paused) && !guildData.get(`${player.guildId}.always.enabled`)) {
 						// The bot is not playing anything - leave immediately
-						if (!player.queue.current || !player.playing && !player.paused) {
-							if (guildData.get(`${player.guildId}.always.enabled`)) {
-								guildData.set(`${player.guildId}.always.enabled`, false);
-							}
-							logger.info({ message: `[G ${player.guildId}] Disconnecting (alone)`, label: 'Quaver' });
-							await player.musicHandler.locale('MUSIC_ALONE_MOVED');
-							await player.musicHandler.disconnect();
-							return;
+						if (guildData.get(`${player.guildId}.always.enabled`)) {
+							guildData.set(`${player.guildId}.always.enabled`, false);
 						}
+						logger.info({ message: `[G ${player.guildId}] Disconnecting (alone)`, label: 'Quaver' });
+						await player.musicHandler.locale('MUSIC_ALONE_MOVED');
+						await player.musicHandler.disconnect();
+						return;
+					}
+					if (!player.pauseTimeout && (player.queue.current || player.playing && player.paused) && !guildData.get(`${player.guildId}.always.enabled`)) {
+						// The bot was playing something, set pause time out
+						await player.pause();
+						logger.info({ message: `[G ${player.guildId}] Setting pause timeout`, label: 'Quaver' });
+						player.pauseTimeout = setTimeout(p => {
+							logger.info({ message: `[G ${p.guildId}] Disconnecting (inactivity)`, label: 'Quaver' });
+							p.musicHandler.locale('MUSIC_INACTIVITY');
+							p.musicHandler.disconnect();
+						}, 300000, player);
+						await player.musicHandler.send(`${getLocale(guildData.get(`${player.guildId}.locale`) ?? defaultLocale, 'MUSIC_ALONE_WARNING')} ${getLocale(guildData.get(`${player.guildId}.locale`) ?? defaultLocale, 'MUSIC_INACTIVITY_WARNING', Math.floor(Date.now() / 1000) + 300)}`, { footer: getLocale(guildData.get(`${player.guildId}.locale`) ?? defaultLocale, 'MUSIC_ALONE_REJOIN') });
+						return;
 					}
 					return console.log('Quaver moved from STAGE to VOICE');
 				}
@@ -350,12 +382,42 @@ module.exports = {
 							return;
 						}
 					}
+					if (!player.pauseTimeout && (player.queue.current || player.playing && player.paused) && !guildData.get(`${player.guildId}.always.enabled`)) {
+						// The bot was playing something, set pause time out
+						await player.pause();
+						logger.info({ message: `[G ${player.guildId}] Setting pause timeout`, label: 'Quaver' });
+						player.pauseTimeout = setTimeout(p => {
+							logger.info({ message: `[G ${p.guildId}] Disconnecting (inactivity)`, label: 'Quaver' });
+							p.musicHandler.locale('MUSIC_INACTIVITY');
+							p.musicHandler.disconnect();
+						}, 300000, player);
+						await player.musicHandler.send(`${getLocale(guildData.get(`${player.guildId}.locale`) ?? defaultLocale, 'MUSIC_ALONE_WARNING')} ${getLocale(guildData.get(`${player.guildId}.locale`) ?? defaultLocale, 'MUSIC_INACTIVITY_WARNING', Math.floor(Date.now() / 1000) + 300)}`, { footer: getLocale(guildData.get(`${player.guildId}.locale`) ?? defaultLocale, 'MUSIC_ALONE_REJOIN') });
+						return;
+					}
 					return console.log('Quaver moved from VOICE to VOICE');
 				}
 			}
 			// Human moved
 			if (!newState.member.user.bot) {
-				return console.log('Human moved');
+				const newVoiceChannel = bot.guilds.cache.get(guild.id).channels.cache.get(newState.channelId);
+				// Joined in VOICE
+				if (newVoiceChannel.type === 'GUILD_VOICE') {
+					if (newVoiceChannel.members.has(bot.user.id) && player.pauseTimeout) {
+						player.resume();
+						clearTimeout(player.pauseTimeout);
+						delete player.pauseTimeout;
+						await player.musicHandler.locale('MUSIC_ALONE_RESUMED');
+					}
+				}
+				// Joined in STAGE
+				if (newVoiceChannel.type === 'GUILD_STAGE_VOICE') {
+					if (newVoiceChannel.members.has(bot.user.id) && player.pauseTimeout) {
+						player.resume();
+						clearTimeout(player.pauseTimeout);
+						delete player.pauseTimeout;
+						await player.musicHandler.locale('MUSIC_ALONE_RESUMED');
+					}
+				}
 			}
 		}
 	},
