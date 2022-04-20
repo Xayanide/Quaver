@@ -33,6 +33,17 @@ module.exports = {
 		 *
 		 */
 
+		/**
+		 *
+		 * List of issues:
+		 *
+		 * 1. Ending a stage with humans sets pauseTimeout
+		 * - Everytime a stage ends with humans and bots,
+		 * - the humans disconnects first, *Leave event* kicks in, followed by the bot disconnection.
+		 * - Well, fuck, I can't control whoever leaves first when a stage ends.
+		 *
+		 */
+
 		// No player, ignore all events
 		if (!player) return console.log('No player, ignored every event');
 
