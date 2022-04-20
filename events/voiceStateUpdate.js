@@ -34,7 +34,12 @@ module.exports = {
 		// No player, ignore all events
 		if (!player) return console.log('No player, ignored every event');
 
-		// Leave event
+		/**
+		 *
+		 * Leave event
+		 * @description - oldState is defined, newState is null
+		 *
+		 */
 		if (oldState.channelId && newState.channelId === null) {
 			// Bot leave
 			if (oldState.member.user.id === bot.user.id) {
@@ -117,7 +122,12 @@ module.exports = {
 			}
 		}
 
-		// Join event
+		/**
+		 *
+		 * Join event
+		 * @description - oldState is null, newState is defined
+		 *
+		 */
 		if (newState.channelId && oldState.channelId === null) {
 			// Bot join
 			if (newState.member.user.id === bot.user.id) {
@@ -189,7 +199,12 @@ module.exports = {
 			}
 		}
 
-		// Move event
+		/**
+		 *
+		 * Move event
+		 * @description - oldState is defined, newState is defined
+		 *
+		 */
 		if (oldState.channelId && newState.channelId) {
 			// Bot move
 			if (oldState.member.user.id === bot.user.id) {
