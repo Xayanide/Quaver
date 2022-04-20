@@ -70,6 +70,8 @@ module.exports = {
 				if ((oldState.suppress !== newState.suppress || oldState.serverMute !== newState.serverMute || oldState.serverDeaf !== newState.serverDeaf) && oldState.channelId === newState.channelId) return console.log('Leave: Human state change');
 				// Human leave but bot is present
 				if (oldState.channel.members.has(bot.user.id)) {
+					// Vc still has humans
+					if (oldState.channel.members.filter(m => !m.user.bot).size >= 1) return;
 					// The bot is not playing anything - leave immediately
 					if (!player.queue.current || !player.playing && !player.paused) {
 						if (guildData.get(`${player.guildId}.always.enabled`)) {
@@ -82,8 +84,10 @@ module.exports = {
 					}
 					// Avoid pauseTimeout if 24/7 is enabled
 					if (guildData.get(`${player.guildId}.always.enabled`)) return;
+					// Avoid pauseTimeout if there is pauseTimeout
+					if (player.pauseTimeout) return;
 					// The bot was playing something - set pauseTimeout
-					if (!player.pauseTimeout && (player.queue.current || player.playing && player.paused)) {
+					if (player.queue.current || player.playing && player.paused) {
 						await player.pause();
 						logger.info({ message: `[G ${player.guildId}] Setting pause timeout`, label: 'Quaver' });
 						if (player.pauseTimeout) {
@@ -156,8 +160,10 @@ module.exports = {
 			if (!newState.member.user.bot) {
 				// Human state change
 				if ((newState.suppress !== oldState.suppress || newState.serverMute !== oldState.serverMute || newState.serverDeaf !== oldState.serverDeaf) && newState.channelId === oldState.channelId) return console.log('Join: Human state change');
-				// User voiceStateUpdate, the channel is the bot's channel, and there's a pauseTimeout
-				if (newState.channelId === player?.channelId && player?.pauseTimeout) {
+				// Avoid resume if there is no pauseTimeout
+				if (!player?.pauseTimeout) return;
+				// User voiceStateUpdate, the channel is the bot's channel
+				if (newState.channelId === player?.channelId) {
 					player.resume();
 					if (player.pauseTimeout) {
 						clearTimeout(player.pauseTimeout);
@@ -230,8 +236,10 @@ module.exports = {
 					}
 					// Avoid pauseTimeout if 24/7 is enabled
 					if (guildData.get(`${player.guildId}.always.enabled`)) return;
+					// Avoid pauseTimeout if there is pauseTimeout
+					if (player.pauseTimeout) return;
 					// The bot was playing something - set pauseTimeout
-					if (!player.pauseTimeout && (player.queue.current || player.playing && player.paused)) {
+					if (player.queue.current || player.playing && player.paused) {
 						await player.pause();
 						logger.info({ message: `[G ${player.guildId}] Setting pause timeout`, label: 'Quaver' });
 						if (player.pauseTimeout) {
@@ -271,8 +279,12 @@ module.exports = {
 				}
 				// Avoid pauseTimeout if 24/7 is enabled
 				if (guildData.get(`${player.guildId}.always.enabled`)) return;
+				// Avoid pauseTimeout if there is pauseTimeout
+				if (player.pauseTimeout) return;
+				// Vc still has humans
+				if (oldState.channel.members.filter(m => !m.user.bot).size >= 1) return;
 				// The bot was playing something - set pauseTimeout
-				if (!player.pauseTimeout && (player.queue.current || player.playing && player.paused)) {
+				if (player.queue.current || player.playing && player.paused) {
 					await player.pause();
 					logger.info({ message: `[G ${player.guildId}] Setting pause timeout`, label: 'Quaver' });
 					if (player.pauseTimeout) {
