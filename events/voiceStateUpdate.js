@@ -70,6 +70,8 @@ module.exports = {
 				if ((oldState.suppress !== newState.suppress || oldState.serverMute !== newState.serverMute || oldState.serverDeaf !== newState.serverDeaf) && oldState.channelId === newState.channelId) return console.log('Leave: Human state change');
 				// Bot was not in the same channel
 				if (!oldState.channel.members.has(bot.user.id)) return;
+				// Avoid pauseTimeout if 24/7 is enabled
+				if (guildData.get(`${player.guildId}.always.enabled`)) return;
 				// The bot is not playing anything - leave immediately
 				if (!player.queue.current || !player.playing && !player.paused) {
 					if (guildData.get(`${player.guildId}.always.enabled`)) {
@@ -80,8 +82,6 @@ module.exports = {
 					await player.musicHandler.disconnect();
 					return;
 				}
-				// Avoid pauseTimeout if 24/7 is enabled
-				if (guildData.get(`${player.guildId}.always.enabled`)) return;
 				// Vc still has humans - do not set pauseTimeout again
 				if (oldState.channel.members.filter(m => !m.user.bot).size >= 1) return;
 				// Avoid pauseTimeout if there is pauseTimeout
@@ -226,6 +226,8 @@ module.exports = {
 				}
 				// The new vc has no humans
 				if (newState.channel.members.filter(m => !m.user.bot).size < 1 && !guildData.get(`${player.guildId}.always.enabled`)) {
+					// Avoid pauseTimeout if 24/7 is enabled
+					if (guildData.get(`${player.guildId}.always.enabled`)) return;
 					// The bot is not playing anything - leave immediately
 					if (!player.queue.current || !player.playing && !player.paused) {
 						if (guildData.get(`${player.guildId}.always.enabled`)) {
@@ -236,8 +238,6 @@ module.exports = {
 						await player.musicHandler.disconnect();
 						return;
 					}
-					// Avoid pauseTimeout if 24/7 is enabled
-					if (guildData.get(`${player.guildId}.always.enabled`)) return;
 					// Avoid pauseTimeout if there is pauseTimeout
 					if (player.pauseTimeout) return;
 					// The bot was playing something - set pauseTimeout
@@ -280,6 +280,8 @@ module.exports = {
 					await player.musicHandler.locale('MUSIC_ALONE_RESUMED');
 					return;
 				}
+				// Avoid pauseTimeout if 24/7 is enabled
+				if (guildData.get(`${player.guildId}.always.enabled`)) return;
 				// The bot is not playing anything - leave immediately
 				if (!player.queue.current || !player.playing && !player.paused) {
 					if (guildData.get(`${player.guildId}.always.enabled`)) {
@@ -290,8 +292,6 @@ module.exports = {
 					await player.musicHandler.disconnect();
 					return;
 				}
-				// Avoid pauseTimeout if 24/7 is enabled
-				if (guildData.get(`${player.guildId}.always.enabled`)) return;
 				// Avoid pauseTimeout if there is pauseTimeout
 				if (player.pauseTimeout) return;
 				// Vc still has humans - do not set pauseTimeout again
