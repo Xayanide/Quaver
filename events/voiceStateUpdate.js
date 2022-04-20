@@ -63,7 +63,7 @@ module.exports = {
 					}
 					await player.musicHandler.disconnect();
 					await player.musicHandler.locale('MUSIC_FORCED');
-					// check for connect, speak permission for voice channel
+					// Check for connect, speak permission for voice channel
 					const permissions = bot.guilds.cache.get(guild.id).channels?.cache.get(oldState.channelId).permissionsFor(bot.user.id);
 					if (!permissions.has(['VIEW_CHANNEL', 'CONNECT', 'SPEAK'])) {
 						await player.musicHandler.locale('DISCORD_BOT_MISSING_PERMISSIONS_BASIC');
@@ -212,6 +212,7 @@ module.exports = {
 			if (oldState.member.user.id === bot.user.id) {
 				// Bot state change
 				if ((oldState.suppress !== newState.suppress || oldState.serverMute !== newState.serverMute || oldState.serverDeaf !== newState.serverDeaf) && oldState.channelId === newState.channelId) return console.log('Move: Bot state change');
+				// Bot move to voice
 				if (newState.channel.type === 'GUILD_VOICE') {
 					// Check for connect, speak permission for voice channel
 					const permissions = bot.guilds.cache.get(guild.id).channels.cache.get(newState.channelId).permissionsFor(bot.user.id);
