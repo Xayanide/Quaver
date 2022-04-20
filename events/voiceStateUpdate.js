@@ -122,8 +122,8 @@ module.exports = {
 					}
 					return console.log('Join: Bot join to voice');
 				}
-				// Bot join to stage, suppress
-				if (newState.channel.type === 'GUILD_STAGE_VOICE' && newState.suppress) {
+				// Bot join to stage
+				if (newState.channel.type === 'GUILD_STAGE_VOICE') {
 					const permissions = bot.guilds.cache.get(guild.id).channels.cache.get(newState.channelId).permissionsFor(bot.user.id);
 					// Check for connect, speak permission for stage channel
 					if (!permissions.has(['VIEW_CHANNEL', 'CONNECT', 'SPEAK'])) {
@@ -139,7 +139,9 @@ module.exports = {
 						await player.musicHandler.disconnect();
 						return;
 					}
-					await newState.setSuppressed(false);
+					if (newState.suppress) {
+						await newState.setSuppressed(false);
+					}
 					if (!newState.channel.stageInstance?.topic) {
 						try {
 							await newState.channel.createStageInstance({ topic: getLocale(guildData.get(`${player.guildId}.locale`) ?? defaultLocale, 'MUSIC_STAGE_TOPIC'), privacyLevel: 'GUILD_ONLY' });
@@ -190,8 +192,8 @@ module.exports = {
 						guildData.set(`${player.guildId}.always.channel`, newState.channelId);
 					}
 				}
-				// Bot move to stage, suppress
-				if (newState.channel.type === 'GUILD_STAGE_VOICE' && newState.suppress) {
+				// Bot move to stage
+				if (newState.channel.type === 'GUILD_STAGE_VOICE') {
 					const permissions = bot.guilds.cache.get(guild.id).channels.cache.get(newState.channelId).permissionsFor(bot.user.id);
 					// Check for connect, speak permission for stage channel
 					if (!permissions.has(['VIEW_CHANNEL', 'CONNECT', 'SPEAK'])) {
@@ -207,7 +209,9 @@ module.exports = {
 						await player.musicHandler.disconnect();
 						return;
 					}
-					await newState.setSuppressed(false);
+					if (newState.suppress) {
+						await newState.setSuppressed(false);
+					}
 					if (!newState.channel.stageInstance?.topic) {
 						try {
 							await newState.channel.createStageInstance({ topic: getLocale(guildData.get(`${player.guildId}.locale`) ?? defaultLocale, 'MUSIC_STAGE_TOPIC'), privacyLevel: 'GUILD_ONLY' });
