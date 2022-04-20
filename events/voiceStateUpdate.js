@@ -11,7 +11,7 @@ module.exports = {
 	 * voiceStateUpdate
 	 * @param {*} oldState - Defined when someone leaves, null when someone joins
 	 * @param {*} newState - Defined when someone joins, null when someone leaves
-	 * @description - Both of them becomes defined if someone moves from one channel to another, or changes their state
+	 * @description - Both of them becomes defined when someone moves from one channel to another, or changes their state
 	 * @returns {*}
 	 */
 	async execute(oldState, newState) {
