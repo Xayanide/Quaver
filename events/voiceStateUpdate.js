@@ -37,10 +37,12 @@ module.exports = {
 		 *
 		 * List of issues:
 		 *
-		 * 1. Ending a stage with humans sets pauseTimeout
+		 * 1. Ending a stage with humans and bot, 24/7 disabled, the bot sets pauseTimeout
+		 * - Intended behaviour: Do not set pauseTimeout
+		 * - Why it happens:
 		 * - Everytime a stage ends with humans and bots,
 		 * - the humans disconnects first, *Leave event* kicks in, followed by the bot disconnection.
-		 * - Well, fuck, I can't control whoever leaves first when a stage ends.
+		 * - Well, fuck. I can't control whoever leaves first when a stage ends.
 		 *
 		 */
 
