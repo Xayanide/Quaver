@@ -20,8 +20,8 @@ module.exports = {
 
 		/**
 		 * WARNING:
-		 * Repetitive code ahead.
-		 * I do not guarantee that these are good code.
+		 * Repetitive code ahead
+		 * I do not guarantee that this is good code
 		 */
 
 		// No player, ignore all events
