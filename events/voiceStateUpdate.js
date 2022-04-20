@@ -9,10 +9,10 @@ module.exports = {
 	once: false,
 	/**
 	 * voiceStateUpdate
-	 * @param {number} oldState - Defined when someone leaves, null when someone joins
-	 * @param {number} newState - Defined when someone joins, null when someone leaves
+	 * @param {*} oldState - Defined when someone leaves, null when someone joins
+	 * @param {*} newState - Defined when someone joins, null when someone leaves
 	 * @description - Both of them becomes defined if someone moves from one channel to another, or changes their state
-	 * @returns {number}
+	 * @returns {*}
 	 */
 	async execute(oldState, newState) {
 		const guild = oldState.guild;
