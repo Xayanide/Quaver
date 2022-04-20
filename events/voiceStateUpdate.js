@@ -68,38 +68,37 @@ module.exports = {
 			if (!oldState.member.user.bot) {
 				// Human state change
 				if ((oldState.suppress !== newState.suppress || oldState.serverMute !== newState.serverMute || oldState.serverDeaf !== newState.serverDeaf) && oldState.channelId === newState.channelId) return console.log('Leave: Human state change');
-				// Human leave but bot is present
-				if (oldState.channel.members.has(bot.user.id)) {
-					// Vc still has humans
-					if (oldState.channel.members.filter(m => !m.user.bot).size >= 1) return;
-					// The bot is not playing anything - leave immediately
-					if (!player.queue.current || !player.playing && !player.paused) {
-						if (guildData.get(`${player.guildId}.always.enabled`)) {
-							guildData.set(`${player.guildId}.always.enabled`, false);
-						}
-						logger.info({ message: `[G ${player.guildId}] Disconnecting (alone)`, label: 'Quaver' });
-						await player.musicHandler.locale('MUSIC_ALONE_MOVED');
-						await player.musicHandler.disconnect();
-						return;
+				// Bot was not in the same channel
+				if (!oldState.channel.members.has(bot.user.id)) return;
+				// The bot is not playing anything - leave immediately
+				if (!player.queue.current || !player.playing && !player.paused) {
+					if (guildData.get(`${player.guildId}.always.enabled`)) {
+						guildData.set(`${player.guildId}.always.enabled`, false);
 					}
-					// Avoid pauseTimeout if 24/7 is enabled
-					if (guildData.get(`${player.guildId}.always.enabled`)) return;
-					// Avoid pauseTimeout if there is pauseTimeout
-					if (player.pauseTimeout) return;
-					// The bot was playing something - set pauseTimeout
-					if (player.queue.current || player.playing && player.paused) {
-						await player.pause();
-						logger.info({ message: `[G ${player.guildId}] Setting pause timeout`, label: 'Quaver' });
-						if (player.pauseTimeout) {
-							clearTimeout(player.pauseTimeout);
-						}
-						player.pauseTimeout = setTimeout(p => {
-							logger.info({ message: `[G ${p.guildId}] Disconnecting (inactivity)`, label: 'Quaver' });
-							p.musicHandler.locale('MUSIC_INACTIVITY');
-							p.musicHandler.disconnect();
-						}, 300000, player);
-						await player.musicHandler.send(`${getLocale(guildData.get(`${player.guildId}.locale`) ?? defaultLocale, 'MUSIC_ALONE_WARNING')} ${getLocale(guildData.get(`${player.guildId}.locale`) ?? defaultLocale, 'MUSIC_INACTIVITY_WARNING', Math.floor(Date.now() / 1000) + 300)}`, { footer: getLocale(guildData.get(`${player.guildId}.locale`) ?? defaultLocale, 'MUSIC_ALONE_REJOIN') });
+					logger.info({ message: `[G ${player.guildId}] Disconnecting (alone)`, label: 'Quaver' });
+					await player.musicHandler.locale('MUSIC_ALONE_MOVED');
+					await player.musicHandler.disconnect();
+					return;
+				}
+				// Avoid pauseTimeout if 24/7 is enabled
+				if (guildData.get(`${player.guildId}.always.enabled`)) return;
+				// Vc still has humans - do not set pauseTimeout again
+				if (oldState.channel.members.filter(m => !m.user.bot).size >= 1) return;
+				// Avoid pauseTimeout if there is pauseTimeout
+				if (player.pauseTimeout) return;
+				// The bot was playing something - set pauseTimeout
+				if (player.queue.current || player.playing && player.paused) {
+					await player.pause();
+					logger.info({ message: `[G ${player.guildId}] Setting pause timeout`, label: 'Quaver' });
+					if (player.pauseTimeout) {
+						clearTimeout(player.pauseTimeout);
 					}
+					player.pauseTimeout = setTimeout(p => {
+						logger.info({ message: `[G ${p.guildId}] Disconnecting (inactivity)`, label: 'Quaver' });
+						p.musicHandler.locale('MUSIC_INACTIVITY');
+						p.musicHandler.disconnect();
+					}, 300000, player);
+					await player.musicHandler.send(`${getLocale(guildData.get(`${player.guildId}.locale`) ?? defaultLocale, 'MUSIC_ALONE_WARNING')} ${getLocale(guildData.get(`${player.guildId}.locale`) ?? defaultLocale, 'MUSIC_INACTIVITY_WARNING', Math.floor(Date.now() / 1000) + 300)}`, { footer: getLocale(guildData.get(`${player.guildId}.locale`) ?? defaultLocale, 'MUSIC_ALONE_REJOIN') });
 				}
 			}
 		}
@@ -160,10 +159,9 @@ module.exports = {
 			if (!newState.member.user.bot) {
 				// Human state change
 				if ((newState.suppress !== oldState.suppress || newState.serverMute !== oldState.serverMute || newState.serverDeaf !== oldState.serverDeaf) && newState.channelId === oldState.channelId) return console.log('Join: Human state change');
-				// Avoid resume if there is no pauseTimeout
-				if (!player?.pauseTimeout) return;
 				// User voiceStateUpdate, the channel is the bot's channel
-				if (newState.channelId === player?.channelId) {
+				// And there is pauseTimeout
+				if (newState.channelId === player?.channelId && player?.pauseTimeout) {
 					player.resume();
 					if (player.pauseTimeout) {
 						clearTimeout(player.pauseTimeout);
@@ -267,6 +265,17 @@ module.exports = {
 			if (!oldState.member.user.bot) {
 				// Human state change
 				if ((oldState.suppress !== newState.suppress || oldState.serverMute !== newState.serverMute || oldState.serverDeaf !== newState.serverDeaf) && oldState.channelId === newState.channelId) return console.log('Move: Human state change');
+				// User voiceStateUpdate, the channel is the bot's channel
+				// And there is pauseTimeout
+				if (newState.channelId === player?.channelId && player?.pauseTimeout) {
+					player.resume();
+					if (player.pauseTimeout) {
+						clearTimeout(player.pauseTimeout);
+						delete player.pauseTimeout;
+					}
+					await player.musicHandler.locale('MUSIC_ALONE_RESUMED');
+					return;
+				}
 				// The bot is not playing anything - leave immediately
 				if (!player.queue.current || !player.playing && !player.paused) {
 					if (guildData.get(`${player.guildId}.always.enabled`)) {
@@ -281,7 +290,7 @@ module.exports = {
 				if (guildData.get(`${player.guildId}.always.enabled`)) return;
 				// Avoid pauseTimeout if there is pauseTimeout
 				if (player.pauseTimeout) return;
-				// Vc still has humans
+				// Vc still has humans - do not set pauseTimeout again
 				if (oldState.channel.members.filter(m => !m.user.bot).size >= 1) return;
 				// The bot was playing something - set pauseTimeout
 				if (player.queue.current || player.playing && player.paused) {
