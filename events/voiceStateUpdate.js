@@ -7,11 +7,20 @@ const { defaultLocale } = require('../settings.json');
 module.exports = {
 	name: 'voiceStateUpdate',
 	once: false,
+	/**
+	 * voiceStateUpdate
+	 * @param {number} oldState - Defined when someone leaves, null when someone joins
+	 * @param {number} newState - Defined when someone joins, null when someone leaves
+	 * @description - Both of them becomes defined if someone moves from one channel to another, or changes their state
+	 * @returns {number}
+	 */
 	async execute(oldState, newState) {
 		const guild = oldState.guild;
 		const player = bot.music.players.get(guild.id);
-		if (!player) return;
-		// Leave
+		// No player, ignore all events
+		if (!player) return console.log('No player, ignored every event');
+
+		// Leave event
 		if (oldState.channelId && newState.channelId === null) {
 			// Bot leave
 			if (oldState.member.user.id === bot.user.id) {
@@ -91,7 +100,7 @@ module.exports = {
 			}
 		}
 
-		// Join
+		// Join event
 		if (newState.channelId && oldState.channelId === null) {
 			// Bot join
 			if (newState.member.user.id === bot.user.id) {
@@ -160,7 +169,7 @@ module.exports = {
 			}
 		}
 
-		// Move
+		// Move event
 		if (oldState.channelId && newState.channelId) {
 			// Bot move
 			if (oldState.member.user.id === bot.user.id) {
