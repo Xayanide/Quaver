@@ -17,6 +17,13 @@ module.exports = {
 	async execute(oldState, newState) {
 		const guild = oldState.guild;
 		const player = bot.music.players.get(guild.id);
+
+		/**
+		 * WARNING:
+		 * Repetitive code ahead.
+		 * I do not guarantee that these are good code.
+		 */
+
 		// No player, ignore all events
 		if (!player) return console.log('No player, ignored every event');
 
@@ -43,7 +50,7 @@ module.exports = {
 					await player.musicHandler.disconnect();
 					await player.musicHandler.locale('MUSIC_FORCED');
 					// check for connect, speak permission for voice channel
-					const permissions = bot.guilds.cache.get(guild.id).channels.cache.get(oldState.channelId).permissionsFor(bot.user.id);
+					const permissions = bot.guilds.cache.get(guild.id).channels?.cache.get(oldState.channelId).permissionsFor(bot.user.id);
 					if (!permissions.has(['VIEW_CHANNEL', 'CONNECT', 'SPEAK'])) {
 						await player.musicHandler.locale('DISCORD_BOT_MISSING_PERMISSIONS_BASIC');
 						return;
