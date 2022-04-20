@@ -9,11 +9,13 @@ module.exports = {
 	once: false,
 	/**
 	 *
-	 * voiceStateUpdate
-	 * @param {*} oldState - Defined when someone leaves, null when someone joins
-	 * @param {*} newState - Defined when someone joins, null when someone leaves
+	 * voiceStateUpdate event listener
+	 * https://discord.js.org/#/docs/discord.js/stable/class/Client?scrollTo=e-voiceStateUpdate
+	 *
+	 * @param {VoiceState} oldState - Defined when someone leaves, null when someone joins
+	 * @param {VoiceState} newState - Defined when someone joins, null when someone leaves
 	 * @description - Both of them becomes defined when someone moves from one channel to another, or changes their state
-	 * @returns {*} - State
+	 * @returns {VoiceState} - The emitted state
 	 *
 	 */
 	async execute(oldState, newState) {
@@ -128,7 +130,7 @@ module.exports = {
 		 * @description - oldState is null, newState is defined
 		 *
 		 */
-		if (newState.channelId && oldState.channelId === null) {
+		if (oldState.channelId === null && newState.channelId) {
 			// Bot join
 			if (newState.member.user.id === bot.user.id) {
 				// Bot state change
