@@ -8,20 +8,26 @@ module.exports = {
 	name: 'voiceStateUpdate',
 	once: false,
 	/**
+	 *
 	 * voiceStateUpdate
 	 * @param {*} oldState - Defined when someone leaves, null when someone joins
 	 * @param {*} newState - Defined when someone joins, null when someone leaves
 	 * @description - Both of them becomes defined when someone moves from one channel to another, or changes their state
-	 * @returns {*}
+	 * @returns {*} - State
+	 *
 	 */
 	async execute(oldState, newState) {
 		const guild = oldState.guild;
 		const player = bot.music.players.get(guild.id);
 
 		/**
+		 *
 		 * WARNING:
 		 * Repetitive code ahead
+		 * https://www.youtube.com/watch?v=UnIhRpIT7nc
+		 *
 		 * I do not guarantee that this is good code
+		 *
 		 */
 
 		// No player, ignore all events
