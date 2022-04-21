@@ -50,6 +50,9 @@ module.exports = {
 		 * - Why it happens:
 		 * - The user leaves, *Leave event* kicks in, sets pauseTimeout
 		 *
+		 * 3. Leaving the channel right at the same time Quaver queues tracks will not set pauseTimeout
+		 * - Intended behaviour: Set pauseTimeout
+		 *
 		 */
 
 		// No player, ignore all events
