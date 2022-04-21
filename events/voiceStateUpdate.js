@@ -128,7 +128,7 @@ module.exports = {
 					if (oldState.channel.type === 'GUILD_STAGE_VOICE') {
 						if (await !player) return console.log('Player gone');
 						if (await !player?.connected) return console.log('Player not connected');
-						if (await !oldState.channel?.members.find(m => m.user.id === bot.user.id)) return console.log('Bot left');
+						if (await !oldState.channel.members.get(bot.user.id)) return console.log('Bot not found in ended stage');
 					}
 					await player.pause();
 					logger.info({ message: `[G ${player.guildId}] Setting pause timeout`, label: 'Quaver' });
