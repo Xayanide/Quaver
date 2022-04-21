@@ -45,6 +45,11 @@ module.exports = {
 		 * - since the bot still exists in that timeframe, followed by the bot disconnection.
 		 * - Well, fuck. I can't control whoever leaves first when a stage ends.
 		 *
+		* 2. Skipping at the same time the user leaves set pauseTimeout
+		 * - Intended behaviour: Do not set pauseTimeout, leave as everyone left.
+		 * - Why it happens:
+		 * - The user leaves, *Leave event* kicks in, sets pauseTimeout
+		 *
 		 */
 
 		// No player, ignore all events
@@ -108,41 +113,36 @@ module.exports = {
 				if (!oldState.channel.members.has(bot.user.id)) return;
 				// Avoid pauseTimeout if 24/7 is enabled
 				if (guildData.get(`${player.guildId}.always.enabled`)) return;
-				// The bot is not playing anything - leave immediately
-				if (!player.queue.current || !player.playing && !player.paused) {
-					if (guildData.get(`${player.guildId}.always.enabled`)) {
-						guildData.set(`${player.guildId}.always.enabled`, false);
-					}
-					logger.info({ message: `[G ${player.guildId}] Disconnecting (alone)`, label: 'Quaver' });
-					await player.musicHandler.locale('MUSIC_ALONE_MOVED');
-					await player.musicHandler.disconnect();
-					return;
-				}
 				// Vc still has humans - do not set pauseTimeout again
 				if (oldState.channel.members.filter(m => !m.user.bot).size >= 1) return;
 				// Avoid pauseTimeout if there is pauseTimeout
 				if (player.pauseTimeout) return;
-				// The bot was playing something - set pauseTimeout
-				if (player.queue.current || player.playing && player.paused) {
-					// These code prevent the bot set pausetTimeout when a stage ends
-					// Do not remove, otherwise. It will break.
-					if (oldState.channel.type === 'GUILD_STAGE_VOICE') {
-						if (await !player) return console.log('Player gone');
-						if (await !player?.connected) return console.log('Player not connected');
-						if (await !oldState.channel.members.get(bot.user.id)) return console.log('Bot not found in ended stage');
-					}
-					await player.pause();
-					logger.info({ message: `[G ${player.guildId}] Setting pause timeout`, label: 'Quaver' });
-					if (player.pauseTimeout) {
-						clearTimeout(player.pauseTimeout);
-					}
-					player.pauseTimeout = setTimeout(p => {
-						logger.info({ message: `[G ${p.guildId}] Disconnecting (inactivity)`, label: 'Quaver' });
-						p.musicHandler.locale('MUSIC_INACTIVITY');
-						p.musicHandler.disconnect();
-					}, 300000, player);
-					await player.musicHandler.send(`${getLocale(guildData.get(`${player.guildId}.locale`) ?? defaultLocale, 'MUSIC_ALONE_WARNING')} ${getLocale(guildData.get(`${player.guildId}.locale`) ?? defaultLocale, 'MUSIC_INACTIVITY_WARNING', Math.floor(Date.now() / 1000) + 300)}`, { footer: getLocale(guildData.get(`${player.guildId}.locale`) ?? defaultLocale, 'MUSIC_ALONE_REJOIN') });
+				// The bot is not playing anything - so we just leave
+				if (!player.queue.current || !player.playing && !player.paused) {
+					logger.info({ message: `[G ${player.guildId}] Disconnecting (alone)`, label: 'Quaver' });
+					await player.musicHandler.locale('MUSIC_ALONE');
+					await player.musicHandler.disconnect();
+					return;
 				}
+				// These code prevent the bot set pausetTimeout when a stage ends
+				// Do not remove, otherwise. It will break.
+				if (oldState.channel.type === 'GUILD_STAGE_VOICE') {
+					if (await !player) return console.log('Player gone');
+					if (await !player?.connected) return console.log('Player not connected');
+					if (await !oldState.channel.members.get(bot.user.id)) return console.log('Bot not found in ended stage');
+				}
+				// The bot was playing something - set pauseTimeout
+				await player.pause();
+				logger.info({ message: `[G ${player.guildId}] Setting pause timeout`, label: 'Quaver' });
+				if (player.pauseTimeout) {
+					clearTimeout(player.pauseTimeout);
+				}
+				player.pauseTimeout = setTimeout(p => {
+					logger.info({ message: `[G ${p.guildId}] Disconnecting (inactivity)`, label: 'Quaver' });
+					p.musicHandler.locale('MUSIC_INACTIVITY');
+					p.musicHandler.disconnect();
+				}, 300000, player);
+				await player.musicHandler.send(`${getLocale(guildData.get(`${player.guildId}.locale`) ?? defaultLocale, 'MUSIC_ALONE_WARNING')} ${getLocale(guildData.get(`${player.guildId}.locale`) ?? defaultLocale, 'MUSIC_INACTIVITY_WARNING', Math.floor(Date.now() / 1000) + 300)}`, { footer: getLocale(guildData.get(`${player.guildId}.locale`) ?? defaultLocale, 'MUSIC_ALONE_REJOIN') });
 			}
 		}
 
@@ -209,6 +209,8 @@ module.exports = {
 			if (!newState.member.user.bot) {
 				// Human state change
 				if ((newState.suppress !== oldState.suppress || newState.serverMute !== oldState.serverMute || newState.serverDeaf !== oldState.serverDeaf) && newState.channelId === oldState.channelId) return console.log('Join: Human state change');
+				// Avoid pauseTimeout if 24/7 is enabled
+				if (guildData.get(`${player.guildId}.always.enabled`)) return;
 				// User voiceStateUpdate, the channel is the bot's channel
 				// And there is pauseTimeout
 				if (newState.channelId === player?.channelId && player?.pauseTimeout) {
@@ -324,6 +326,8 @@ module.exports = {
 			if (!oldState.member.user.bot) {
 				// Human state change
 				if ((oldState.suppress !== newState.suppress || oldState.serverMute !== newState.serverMute || oldState.serverDeaf !== newState.serverDeaf) && oldState.channelId === newState.channelId) return console.log('Move: Human state change');
+				// Avoid pauseTimeout if 24/7 is enabled
+				if (guildData.get(`${player.guildId}.always.enabled`)) return;
 				// User voiceStateUpdate, the channel is the bot's channel
 				// And there is pauseTimeout
 				if (newState.channelId === player?.channelId && player?.pauseTimeout) {
@@ -335,36 +339,29 @@ module.exports = {
 					await player.musicHandler.locale('MUSIC_ALONE_RESUMED');
 					return;
 				}
-				// Avoid pauseTimeout if 24/7 is enabled
-				if (guildData.get(`${player.guildId}.always.enabled`)) return;
+				// Vc still has humans - do not set pauseTimeout again
+				if (oldState.channel.members.filter(m => !m.user.bot).size >= 1) return;
+				// Avoid pauseTimeout if there is pauseTimeout
+				if (player.pauseTimeout) return;
 				// The bot is not playing anything - leave immediately
 				if (!player.queue.current || !player.playing && !player.paused) {
-					if (guildData.get(`${player.guildId}.always.enabled`)) {
-						guildData.set(`${player.guildId}.always.enabled`, false);
-					}
 					logger.info({ message: `[G ${player.guildId}] Disconnecting (alone)`, label: 'Quaver' });
-					await player.musicHandler.locale('MUSIC_ALONE_MOVED');
+					await player.musicHandler.locale('MUSIC_ALONE');
 					await player.musicHandler.disconnect();
 					return;
 				}
-				// Avoid pauseTimeout if there is pauseTimeout
-				if (player.pauseTimeout) return;
-				// Vc still has humans - do not set pauseTimeout again
-				if (oldState.channel.members.filter(m => !m.user.bot).size >= 1) return;
 				// The bot was playing something - set pauseTimeout
-				if (player.queue.current || player.playing && player.paused) {
-					await player.pause();
-					logger.info({ message: `[G ${player.guildId}] Setting pause timeout`, label: 'Quaver' });
-					if (player.pauseTimeout) {
-						clearTimeout(player.pauseTimeout);
-					}
-					player.pauseTimeout = setTimeout(p => {
-						logger.info({ message: `[G ${p.guildId}] Disconnecting (inactivity)`, label: 'Quaver' });
-						p.musicHandler.locale('MUSIC_INACTIVITY');
-						p.musicHandler.disconnect();
-					}, 300000, player);
-					await player.musicHandler.send(`${getLocale(guildData.get(`${player.guildId}.locale`) ?? defaultLocale, 'MUSIC_ALONE_WARNING')} ${getLocale(guildData.get(`${player.guildId}.locale`) ?? defaultLocale, 'MUSIC_INACTIVITY_WARNING', Math.floor(Date.now() / 1000) + 300)}`, { footer: getLocale(guildData.get(`${player.guildId}.locale`) ?? defaultLocale, 'MUSIC_ALONE_REJOIN') });
+				await player.pause();
+				logger.info({ message: `[G ${player.guildId}] Setting pause timeout`, label: 'Quaver' });
+				if (player.pauseTimeout) {
+					clearTimeout(player.pauseTimeout);
 				}
+				player.pauseTimeout = setTimeout(p => {
+					logger.info({ message: `[G ${p.guildId}] Disconnecting (inactivity)`, label: 'Quaver' });
+					p.musicHandler.locale('MUSIC_INACTIVITY');
+					p.musicHandler.disconnect();
+				}, 300000, player);
+				await player.musicHandler.send(`${getLocale(guildData.get(`${player.guildId}.locale`) ?? defaultLocale, 'MUSIC_ALONE_WARNING')} ${getLocale(guildData.get(`${player.guildId}.locale`) ?? defaultLocale, 'MUSIC_INACTIVITY_WARNING', Math.floor(Date.now() / 1000) + 300)}`, { footer: getLocale(guildData.get(`${player.guildId}.locale`) ?? defaultLocale, 'MUSIC_ALONE_REJOIN') });
 			}
 		}
 	},
