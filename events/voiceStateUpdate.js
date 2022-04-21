@@ -71,6 +71,7 @@ module.exports = {
 				}
 				// Channel was a stage channel, and bot was unsuppressed
 				if (oldState.channel?.type === 'GUILD_STAGE_VOICE' && !oldState.suppress) {
+					logger.info({ message: `[G ${player.guildId}] Cleaning up`, label: 'Quaver' });
 					if (guildData.get(`${player.guildId}.always.enabled`)) {
 						guildData.set(`${player.guildId}.always.enabled`, false);
 					}
@@ -122,6 +123,13 @@ module.exports = {
 				if (player.pauseTimeout) return;
 				// The bot was playing something - set pauseTimeout
 				if (player.queue.current || player.playing && player.paused) {
+					// These code prevent the bot set pausetTimeout when a stage ends
+					// Do not remove, otherwise. It will break.
+					if (oldState.channel.type === 'GUILD_STAGE_VOICE') {
+						if (await !player) return console.log('Player gone');
+						if (await !player?.connected) return console.log('Player not connected');
+						if (await !oldState.channel?.members.find(m => m.user.id === bot.user.id)) return console.log('Bot left');
+					}
 					await player.pause();
 					logger.info({ message: `[G ${player.guildId}] Setting pause timeout`, label: 'Quaver' });
 					if (player.pauseTimeout) {
