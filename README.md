@@ -1,8 +1,8 @@
 # Quaver
-Quaver is a simple-to-use music bot with features such as bass boost,  nightcore, seek, search, and more.
+Quaver is a simple-to-use music bot with features such as bass boost, nightcore, seek, search, and more.
 
 # Using Quaver
-Quaver utilizes slash commands, buttons, and menus. After running deploying the commands, type `/` into your chat to list Quaver's commands.
+Quaver utilizes slash commands, buttons, and menus. After deploying the commands, type `/` into your chat to list Quaver's commands.
 
 # Hosting Quaver
 Hosting Quaver is fairly simple. Make a copy of `settings.example.json`, edit the fields as necessary and rename it to `settings.json`.
@@ -45,7 +45,10 @@ key).
 ## I changed `defaultLocale`, but it isn't updating in slash command descriptions. Why?
 You need to re-deploy the commands using `node deploy-commands.js` for the new locale to take effect.
 
-Due to Discord's limitations, it is impossible for each guild to have different locales in slash command descriptions.
+Due to Discord's limitations and the localizations we have, we don't currently use Discord's localized command name & description functionality. This may be worked on in the future.
+
+# Translating
+Take a look at our [Crowdin project](https://translate.zptx.icu).
 
 # Contributing
 Refer to [CONTRIBUTING.md](CONTRIBUTING.md).
