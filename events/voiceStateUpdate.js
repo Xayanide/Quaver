@@ -41,7 +41,8 @@ module.exports = {
 		 * - Intended behaviour: Do not set pauseTimeout
 		 * - Why it happens:
 		 * - Everytime a stage ends with humans and bots,
-		 * - the humans disconnects first, *Leave event* kicks in, followed by the bot disconnection.
+		 * - the humans disconnects first, *Leave event* kicks in, sets pauseTimeout
+		 * - since the bot still exists in that timeframe, followed by the bot disconnection.
 		 * - Well, fuck. I can't control whoever leaves first when a stage ends.
 		 *
 		 */
