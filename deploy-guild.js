@@ -9,20 +9,24 @@ const guildId = process.env.GUILD_ID;
 const botToken = process.env.BOT_TOKEN || token;
 
 const commands = [];
-const commandFiles = fs.readdirSync('./commands').filter((file) => file.endsWith('.ts'));
+const commandFiles = fs.readdirSync('./commands').filter((file) => file.endsWith('.js'));
 
 for (const file of commandFiles) {
 	const command = require(`./commands/${file}`);
 	commands.push(command.data.toJSON());
 }
 
-const rest = new REST({ version: '9' }).setToken(botToken);
+const rest = new REST({
+	version: '9',
+}).setToken(botToken);
 
 (async () => {
 	console.log(`Started refreshing application (/) commands for guild ${guildId}`);
 	await rest.put(
 		Routes.applicationGuildCommands(clientId, guildId),
-		{ body: commands },
+		{
+			body: commands,
+		},
 	).then(() => {
 		console.log(`Successfully reloaded application (/) commands for guild ${guildId}`);
 	}).catch((err) => {

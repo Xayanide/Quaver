@@ -7,7 +7,9 @@ const clientId = process.env.BOT_CLIENT_ID || applicationId;
 const guildId = process.env.GUILD_ID;
 const botToken = process.env.BOT_TOKEN || token;
 
-const rest = new REST({ version: '9' }).setToken(botToken);
+const rest = new REST({
+	version: '9',
+}).setToken(botToken);
 
 (async () => {
 	const data = await rest.get(Routes.applicationGuildCommands(clientId, guildId));
