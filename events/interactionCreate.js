@@ -136,7 +136,7 @@ module.exports = {
 						.setStyle('SECONDARY')
 						.setLabel(getLocale(guildData.get(`${interaction.guildId}.locale`) ?? defaultLocale, 'MISC_REFRESH'));
 					try {
-						interaction.update({
+						await interaction.update({
 							embeds: original.embeds,
 							components: original.components,
 						});
@@ -219,7 +219,7 @@ module.exports = {
 					}
 					if (!player?.connected) {
 						player = interaction.client.music.createPlayer(interaction.guildId);
-						player.musicHandler = new MusicHandler(player);
+						player.musicHandler = new MusicHandler(interaction.client, player);
 						player.queue.channel = interaction.channel;
 						await player.connect(interaction.member.voice.channelId, { deafened: true });
 						// that kid left while we were busy bruh
