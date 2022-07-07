@@ -1,23 +1,23 @@
 {
   "name": "quaver",
-  "version": "3.5.0",
+  "version": "3.5.1-next.3",
   "engines": {
     "node": ">=16.9.0"
   },
   "dependencies": {
-    "@discordjs/builders": "^0.16.0-dev.1656060475-e24970e",
+    "@discordjs/builders": "^0.16.0-dev.1657109073-8198da5",
     "@discordjs/rest": "^0.5.0",
     "@lavaclient/queue": "^2.0.6",
     "@lavaclient/spotify": "^3.0.0",
     "data-store": "^4.0.3",
-    "discord-api-types": "^0.35.0",
+    "discord-api-types": "^0.36.1",
     "discord.js": "^13.8.1",
     "lavaclient": "^4.0.8",
     "patch-package": "^6.4.7",
-    "winston": "^3.8.0"
+    "winston": "^3.8.1"
   },
   "devDependencies": {
-    "eslint": "^8.18.0"
+    "eslint": "^8.19.0"
   },
   "main": "main.js",
   "scripts": {
