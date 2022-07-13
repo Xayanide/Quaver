@@ -2,7 +2,7 @@ const { SlashCommandBuilder } = require('@discordjs/builders');
 const { checks } = require('../enums.js');
 const { defaultLocale } = require('../settings.json');
 const { getLocale } = require('../functions.js');
-const { guildData } = require('../shared.js');
+const { data } = require('../shared.js');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -13,13 +13,14 @@ module.exports = {
 		user: [],
 		bot: [],
 	},
+	/** @param {import('discord.js').CommandInteraction & {client: import('discord.js').Client & {music: import('lavaclient').Node}, replyHandler: import('../classes/ReplyHandler.js')}} interaction */
 	async execute(interaction) {
-		if (guildData.get(`${interaction.guildId}.always.enabled`)) {
+		if (await data.guild.get(interaction.guildId, 'settings.stay.enabled')) {
 			await interaction.replyHandler.localeError('CMD_DISCONNECT_247_ENABLED');
 			return;
 		}
 		const player = interaction.client.music.players.get(interaction.guildId);
-		await player.musicHandler.disconnect();
+		await player.handler.disconnect();
 		await interaction.replyHandler.locale('CMD_DISCONNECT_SUCCESS');
 	},
 };

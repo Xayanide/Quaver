@@ -1,10 +1,9 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { MessageActionRow, MessageButton } = require('discord.js');
 const { checks } = require('../enums.js');
-const { paginate, msToTime, msToTimeString } = require('../functions.js');
+const { paginate, getLocale, msToTime, msToTimeString } = require('../functions.js');
 const { defaultLocale } = require('../settings.json');
-const { getLocale } = require('../functions.js');
-const { guildData } = require('../shared.js');
+const { data } = require('../shared.js');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -15,6 +14,7 @@ module.exports = {
 		user: [],
 		bot: [],
 	},
+	/** @param {import('discord.js').CommandInteraction & {client: import('discord.js').Client & {music: import('lavaclient').Node}, replyHandler: import('../classes/ReplyHandler.js')}} interaction */
 	async execute(interaction) {
 		const player = interaction.client.music.players.get(interaction.guildId);
 		const pages = paginate(player.queue.tracks, 5);
@@ -29,7 +29,7 @@ module.exports = {
 				return `\`${index + 1}.\` **[${track.title}](${track.uri})** \`[${durationString}]\` <@${track.requester}>`;
 			}).join('\n'),
 			{
-				footer: getLocale(guildData.get(`${interaction.guildId}.locale`) ?? defaultLocale, 'MISC_PAGE', '1', pages.length),
+				footer: getLocale(await data.guild.get(interaction.guildId, 'settings.locale') ?? defaultLocale, 'MISC_PAGE', '1', pages.length),
 				components: [
 					new MessageActionRow()
 						.addComponents(
@@ -47,7 +47,7 @@ module.exports = {
 								.setCustomId('queue_1')
 								.setEmoji('🔁')
 								.setStyle('SECONDARY')
-								.setLabel(getLocale(guildData.get(`${interaction.guildId}.locale`) ?? defaultLocale, 'MISC_REFRESH')),
+								.setLabel(getLocale(await data.guild.get(interaction.guildId, 'settings.locale') ?? defaultLocale, 'MISC_REFRESH')),
 						),
 				],
 			},

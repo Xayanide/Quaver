@@ -3,7 +3,7 @@ const { LoopType } = require('@lavaclient/queue');
 const { checks } = require('../enums.js');
 const { defaultLocale } = require('../settings.json');
 const { getLocale } = require('../functions.js');
-const { guildData } = require('../shared.js');
+const { data } = require('../shared.js');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -24,6 +24,7 @@ module.exports = {
 		user: [],
 		bot: [],
 	},
+	/** @param {import('discord.js').CommandInteraction & {client: import('discord.js').Client & {music: import('lavaclient').Node}, replyHandler: import('../classes/ReplyHandler.js')}} interaction */
 	async execute(interaction) {
 		const player = interaction.client.music.players.get(interaction.guildId);
 		const type = interaction.options.getString('type');
@@ -31,15 +32,15 @@ module.exports = {
 		switch (type) {
 			case 'disabled':
 				loop = LoopType.None;
-				typeLocale = getLocale(guildData.get(`${interaction.guildId}.locale`) ?? defaultLocale, 'CMD_LOOP_OPTION_TYPE_DISABLED');
+				typeLocale = getLocale(await data.guild.get(interaction.guildId, 'settings.locale') ?? defaultLocale, 'CMD_LOOP_OPTION_TYPE_DISABLED');
 				break;
 			case 'track':
 				loop = LoopType.Song;
-				typeLocale = getLocale(guildData.get(`${interaction.guildId}.locale`) ?? defaultLocale, 'CMD_LOOP_OPTION_TYPE_TRACK');
+				typeLocale = getLocale(await data.guild.get(interaction.guildId, 'settings.locale') ?? defaultLocale, 'CMD_LOOP_OPTION_TYPE_TRACK');
 				break;
 			case 'queue':
 				loop = LoopType.Queue;
-				typeLocale = getLocale(guildData.get(`${interaction.guildId}.locale`) ?? defaultLocale, 'CMD_LOOP_OPTION_TYPE_QUEUE');
+				typeLocale = getLocale(await data.guild.get(interaction.guildId, 'settings.locale') ?? defaultLocale, 'CMD_LOOP_OPTION_TYPE_QUEUE');
 				break;
 		}
 		typeLocale = typeLocale.toLowerCase();

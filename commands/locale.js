@@ -3,7 +3,7 @@ const { MessageEmbed } = require('discord.js');
 const { checks } = require('../enums.js');
 const { defaultLocale } = require('../settings.json');
 const { roundTo, getLocale, checkLocaleCompletion } = require('../functions.js');
-const { guildData } = require('../shared.js');
+const { data } = require('../shared.js');
 const fs = require('fs');
 const path = require('path');
 const { PermissionFlagsBits } = require('discord-api-types/v10');
@@ -25,6 +25,7 @@ module.exports = {
 		user: ['MANAGE_GUILD'],
 		bot: [],
 	},
+	/** @param {import('discord.js').CommandInteraction & {client: import('discord.js').Client, replyHandler: import('../classes/ReplyHandler.js')}} interaction */
 	async execute(interaction) {
 		const locale = interaction.options.getString('new_locale');
 		const localeCompletion = checkLocaleCompletion(locale);
@@ -32,7 +33,7 @@ module.exports = {
 			await interaction.replyHandler.error('That locale does not exist.');
 			return;
 		}
-		guildData.set(`${interaction.guildId}.locale`, locale);
+		await data.guild.set(interaction.guildId, 'settings.locale', locale);
 		const additionalEmbed = localeCompletion.completion !== 100 ? [
 			new MessageEmbed()
 				.setDescription(`This locale is incomplete. Completion: \`${roundTo(localeCompletion.completion, 2)}%\`\nMissing strings:\n\`\`\`\n${localeCompletion.missing.join('\n')}\`\`\``)

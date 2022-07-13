@@ -1,5 +1,5 @@
 const { Permissions } = require('discord.js');
-const { logger, guildData } = require('../shared.js');
+const { logger, data } = require('../shared.js');
 const { getLocale } = require('../functions.js');
 const { bot } = require('../main.js');
 const { defaultLocale } = require('../settings.json');
@@ -7,8 +7,13 @@ const { defaultLocale } = require('../settings.json');
 module.exports = {
 	name: 'voiceStateUpdate',
 	once: false,
+	/**
+	 * @param {import('discord.js').VoiceState} oldState
+	 * @param {import('discord.js').VoiceState} newState
+	 */
 	async execute(oldState, newState) {
 		const guild = oldState.guild;
+		/** @type {import('lavaclient').Player & {handler: import('../classes/PlayerHandler.js')}} */
 		const player = bot.music.players.get(guild.id);
 		if (!player) return;
 		// Quaver voiceStateUpdate
@@ -18,34 +23,12 @@ module.exports = {
 			// disconnected
 			if (!newState.channelId || !newState.channel?.members.find(m => m.user.id === bot.user.id)) {
 				logger.info({ message: `[G ${player.guildId}] Cleaning up`, label: 'Quaver' });
-				if (guildData.get(`${player.guildId}.always.enabled`)) {
-					guildData.set(`${player.guildId}.always.enabled`, false);
+				player.channelId = null;
+				if (await data.guild.get(player.guildId, 'settings.stay.enabled')) {
+					await data.guild.set(player.guildId, 'settings.stay.enabled', false);
 				}
-				const success = await player.musicHandler.locale('MUSIC_FORCED');
-				await player.musicHandler.disconnect();
-				// channel was a stage channel, and bot was unsuppressed
-				if (oldState.channel?.type === 'GUILD_STAGE_VOICE' && !oldState.suppress) {
-					// check for connect, speak permission for voice channel
-					const permissions = bot.guilds.cache.get(guild.id).channels.cache.get(oldState.channelId).permissionsFor(bot.user.id);
-					if (!permissions.has(['VIEW_CHANNEL', 'CONNECT', 'SPEAK'])) {
-						await player.musicHandler.locale('DISCORD_BOT_MISSING_PERMISSIONS_BASIC');
-						return;
-					}
-					if (!permissions.has(Permissions.STAGE_MODERATOR)) {
-						await player.musicHandler.locale('DISCORD_BOT_MISSING_PERMISSIONS_STAGE');
-						return;
-					}
-					// probably don't have perms anyway, let's not bother ending the stage
-					if (!success) return;
-					if (oldState.channel.stageInstance?.topic === getLocale(guildData.get(`${player.guildId}.locale`) ?? defaultLocale, 'MUSIC_STAGE_TOPIC')) {
-						try {
-							await oldState.channel.stageInstance.delete();
-						}
-						catch (err) {
-							logger.error({ message: `${err.message}\n${err.stack}`, label: 'Quaver' });
-						}
-					}
-				}
+				await player.handler.locale('MUSIC_FORCED');
+				await player.handler.disconnect(oldState.channelId);
 				return;
 			}
 			// channel is a voice channel
@@ -53,12 +36,12 @@ module.exports = {
 				// check for connect, speak permission for voice channel
 				const permissions = bot.guilds.cache.get(guild.id).channels.cache.get(newState.channelId).permissionsFor(bot.user.id);
 				if (!permissions.has(['VIEW_CHANNEL', 'CONNECT', 'SPEAK'])) {
-					await player.musicHandler.locale('DISCORD_BOT_MISSING_PERMISSIONS_BASIC');
-					await player.musicHandler.disconnect();
+					await player.handler.locale('DISCORD_BOT_MISSING_PERMISSIONS_BASIC');
+					await player.handler.disconnect();
 					return;
 				}
-				if (guildData.get(`${player.guildId}.always.enabled`) && guildData.get(`${player.guildId}.always.channel`) !== newState.channelId) {
-					guildData.set(`${player.guildId}.always.channel`, newState.channelId);
+				if (await data.guild.get(player.guildId, 'settings.stay.enabled') && await data.guild.get(player.guildId, 'settings.stay.channel') !== newState.channelId) {
+					await data.guild.set(player.guildId, 'settings.stay.channel', newState.channelId);
 				}
 			}
 			// channel is a stage channel, and bot is suppressed
@@ -67,46 +50,46 @@ module.exports = {
 				const permissions = bot.guilds.cache.get(guild.id).channels.cache.get(newState.channelId).permissionsFor(bot.user.id);
 				// check for connect, speak permission for stage channel
 				if (!permissions.has(['VIEW_CHANNEL', 'CONNECT', 'SPEAK'])) {
-					await player.musicHandler.locale('DISCORD_BOT_MISSING_PERMISSIONS_BASIC');
-					await player.musicHandler.disconnect();
+					await player.handler.locale('DISCORD_BOT_MISSING_PERMISSIONS_BASIC');
+					await player.handler.disconnect();
 					return;
 				}
 				if (!permissions.has(Permissions.STAGE_MODERATOR)) {
-					if (guildData.get(`${player.guildId}.always.enabled`)) {
-						guildData.set(`${player.guildId}.always.enabled`, false);
+					if (await data.guild.get(player.guildId, 'settings.stay.enabled')) {
+						await data.guild.set(player.guildId, 'settings.stay.enabled', false);
 					}
-					await player.musicHandler.locale('MUSIC_FORCED_STAGE');
-					await player.musicHandler.disconnect();
+					await player.handler.locale('MUSIC_FORCED_STAGE');
+					await player.handler.disconnect();
 					return;
 				}
 				await newState.setSuppressed(false);
 				if (!newState.channel.stageInstance?.topic) {
 					try {
-						await newState.channel.createStageInstance({ topic: getLocale(guildData.get(`${player.guildId}.locale`) ?? defaultLocale, 'MUSIC_STAGE_TOPIC'), privacyLevel: 'GUILD_ONLY' });
+						await newState.channel.createStageInstance({ topic: getLocale(await data.guild.get(player.guildId, 'settings.locale') ?? defaultLocale, 'MUSIC_STAGE_TOPIC'), privacyLevel: 'GUILD_ONLY' });
 					}
 					catch (err) {
 						logger.error({ message: `${err.message}\n${err.stack}`, label: 'Quaver' });
 					}
 				}
-				if (guildData.get(`${player.guildId}.always.enabled`) && guildData.get(`${player.guildId}.always.channel`) !== newState.channelId) {
-					guildData.set(`${player.guildId}.always.channel`, newState.channelId);
+				if (await data.guild.get(player.guildId, 'settings.stay.enabled') && await data.guild.get(player.guildId, 'settings.stay.channel') !== newState.channelId) {
+					await data.guild.set(player.guildId, 'settings.stay.channel', newState.channelId);
 				}
 				return;
 			}
 			// the new vc has no humans
-			if (newState.channel.members.filter(m => !m.user.bot).size < 1 && !guildData.get(`${player.guildId}.always.enabled`)) {
+			if (newState.channel.members.filter(m => !m.user.bot).size < 1 && !await data.guild.get(player.guildId, 'settings.stay.enabled')) {
 				// the bot is not playing anything - leave immediately
 				if (!player.queue.current || !player.playing && !player.paused) {
-					if (guildData.get(`${player.guildId}.always.enabled`)) {
-						guildData.set(`${player.guildId}.always.enabled`, false);
+					if (await data.guild.get(player.guildId, 'settings.stay.enabled')) {
+						await data.guild.set(player.guildId, 'settings.stay.enabled', false);
 					}
 					logger.info({ message: `[G ${player.guildId}] Disconnecting (alone)`, label: 'Quaver' });
-					await player.musicHandler.locale('MUSIC_ALONE_MOVED');
-					await player.musicHandler.disconnect();
+					await player.handler.locale('MUSIC_ALONE_MOVED');
+					await player.handler.disconnect();
 					return;
 				}
 				// avoid pauseTimeout if 24/7 is enabled
-				if (guildData.get(`${player.guildId}.always.enabled`)) return;
+				if (await data.guild.get(player.guildId, 'settings.stay.enabled')) return;
 				// the bot was playing something - set pauseTimeout
 				await player.pause();
 				logger.info({ message: `[G ${player.guildId}] Setting pause timeout`, label: 'Quaver' });
@@ -115,17 +98,17 @@ module.exports = {
 				}
 				player.pauseTimeout = setTimeout(p => {
 					logger.info({ message: `[G ${p.guildId}] Disconnecting (inactivity)`, label: 'Quaver' });
-					p.musicHandler.locale('MUSIC_INACTIVITY');
-					p.musicHandler.disconnect();
+					p.handler.locale('MUSIC_INACTIVITY');
+					p.handler.disconnect();
 				}, 300000, player);
-				await player.musicHandler.send(`${getLocale(guildData.get(`${player.guildId}.locale`) ?? defaultLocale, 'MUSIC_ALONE_WARNING')} ${getLocale(guildData.get(`${player.guildId}.locale`) ?? defaultLocale, 'MUSIC_INACTIVITY_WARNING', Math.floor(Date.now() / 1000) + 300)}`, { footer: getLocale(guildData.get(`${player.guildId}.locale`) ?? defaultLocale, 'MUSIC_ALONE_REJOIN') });
+				await player.handler.send(`${getLocale(await data.guild.get(player.guildId, 'settings.locale') ?? defaultLocale, 'MUSIC_ALONE_WARNING')} ${getLocale(await data.guild.get(player.guildId, 'settings.locale') ?? defaultLocale, 'MUSIC_INACTIVITY_WARNING', Math.floor(Date.now() / 1000) + 300)}`, { footer: getLocale(await data.guild.get(player.guildId, 'settings.locale') ?? defaultLocale, 'MUSIC_ALONE_REJOIN') });
 			}
 			// the new vc has humans and pauseTimeout is set
 			else if (newState.channel.members.filter(m => !m.user.bot).size >= 1 && player.pauseTimeout) {
 				player.resume();
 				clearTimeout(player.pauseTimeout);
 				delete player.pauseTimeout;
-				await player.musicHandler.locale('MUSIC_ALONE_RESUMED');
+				await player.handler.locale('MUSIC_ALONE_RESUMED');
 				return;
 			}
 		}
@@ -138,7 +121,7 @@ module.exports = {
 				clearTimeout(player.pauseTimeout);
 				delete player.pauseTimeout;
 			}
-			await player.musicHandler.locale('MUSIC_ALONE_RESUMED');
+			await player.handler.locale('MUSIC_ALONE_RESUMED');
 			return;
 		}
 		// user has nothing to do with us
@@ -147,17 +130,20 @@ module.exports = {
 		if (newState.channelId === oldState.channelId) return;
 		// vc still has people
 		if (oldState.channel.members.filter(m => !m.user.bot).size >= 1) return;
-		// player's gone!
-		if (!player.connected) return;
 		// 24/7 mode enabled, ignore
-		if (guildData.get(`${guild.id}.always.enabled`)) return;
+		if (await data.guild.get(guild.id, 'settings.stay.enabled')) return;
 		// nothing is playing so we just leave
 		if (!player.queue.current || !player.playing && !player.paused) {
 			logger.info({ message: `[G ${player.guildId}] Disconnecting (alone)`, label: 'Quaver' });
-			player.musicHandler.locale('MUSIC_ALONE');
-			await player.musicHandler.disconnect();
+			player.handler.locale('MUSIC_ALONE');
+			await player.handler.disconnect();
 			return;
 		}
+		// rare case where the bot sets pause timeout after setting timeout
+		// another weird issue where pause timeout is set after stage ends
+		if (player.timeout || !player.channelId) return;
+		const voiceChannel = bot.guilds.cache.get(player.guildId).channels.cache.get(player.channelId);
+		if (voiceChannel.type === 'GUILD_STAGE_VOICE' && !voiceChannel.stageInstance) return;
 		await player.pause();
 		logger.info({ message: `[G ${player.guildId}] Setting pause timeout`, label: 'Quaver' });
 		if (player.pauseTimeout) {
@@ -165,9 +151,9 @@ module.exports = {
 		}
 		player.pauseTimeout = setTimeout(p => {
 			logger.info({ message: `[G ${p.guildId}] Disconnecting (inactivity)`, label: 'Quaver' });
-			p.musicHandler.locale('MUSIC_INACTIVITY');
-			p.musicHandler.disconnect();
+			p.handler.locale('MUSIC_INACTIVITY');
+			p.handler.disconnect();
 		}, 300000, player);
-		await player.musicHandler.send(`${getLocale(guildData.get(`${player.guildId}.locale`) ?? defaultLocale, 'MUSIC_ALONE_WARNING')} ${getLocale(guildData.get(`${player.guildId}.locale`) ?? defaultLocale, 'MUSIC_INACTIVITY_WARNING', Math.floor(Date.now() / 1000) + 300)}`, { footer: getLocale(guildData.get(`${player.guildId}.locale`) ?? defaultLocale, 'MUSIC_ALONE_REJOIN') });
+		await player.handler.send(`${getLocale(await data.guild.get(player.guildId, 'settings.locale') ?? defaultLocale, 'MUSIC_ALONE_WARNING')} ${getLocale(await data.guild.get(player.guildId, 'settings.locale') ?? defaultLocale, 'MUSIC_INACTIVITY_WARNING', Math.floor(Date.now() / 1000) + 300)}`, { footer: getLocale(await data.guild.get(player.guildId, 'settings.locale') ?? defaultLocale, 'MUSIC_ALONE_REJOIN') });
 	},
 };
