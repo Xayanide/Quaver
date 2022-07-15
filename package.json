@@ -1,23 +1,25 @@
 {
   "name": "quaver",
-  "version": "3.4.2-next.3",
+  "version": "4.0.1-next.1",
   "engines": {
     "node": ">=16.9.0"
   },
   "dependencies": {
-    "@discordjs/builders": "^0.13.0",
-    "@discordjs/rest": "^0.4.1",
+    "@discordjs/builders": "^0.16.0-dev.1657757509-fe34f48",
+    "@discordjs/rest": "^0.5.0",
+    "@keyv/sqlite": "^3.5.2",
     "@lavaclient/queue": "^2.0.6",
     "@lavaclient/spotify": "^3.0.0",
-    "data-store": "^4.0.3",
-    "discord-api-types": "^0.31.2",
-    "discord.js": "^13.6.0",
+    "discord-api-types": "^0.36.1",
+    "discord.js": "^13.8.1",
+    "keyv": "^4.3.2",
     "lavaclient": "^4.0.8",
+    "lodash": "^4.17.21",
     "patch-package": "^6.4.7",
-    "winston": "^3.7.2"
+    "winston": "^3.8.1"
   },
   "devDependencies": {
-    "eslint": "^8.13.0"
+    "eslint": "^8.19.0"
   },
   "main": "main.js",
   "scripts": {
@@ -41,7 +43,7 @@
             "package.json",
             "package-lock.json"
           ],
-          "message": "chore(release): ${nextRelease.version}\n\n${nextRelease.notes}"
+          "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
         }
       ],
       "@semantic-release/github"

@@ -4,11 +4,12 @@ const { version } = require('../package.json');
 module.exports = {
 	name: 'ready',
 	once: false,
+	/** @param {import('discord.js').Client} client */
 	async execute(client) {
 		const { startup, updateStartup } = require('../main.js');
 		if (!startup) {
 			logger.info({ message: `Connected. Logged in as ${client.user.tag}.`, label: 'Discord' });
-			logger.info({ message: `Running version ${version}. For help, see https://github.com/ZapSquared/Quaver/issues.`, label: 'Quaver' });
+			logger.info({ message: `Running version ${version}. For help, see https://github.com/ZPTXDev/Quaver/issues.`, label: 'Quaver' });
 			if (version.includes('-')) {
 				logger.warn({ message: 'You are running an unstable version of Quaver. Please report bugs using the link above, and note that features may change or be removed entirely prior to release.', label: 'Quaver' });
 			}

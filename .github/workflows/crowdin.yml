@@ -7,10 +7,10 @@ jobs:
   crowdin:
     name: Crowdin
     runs-on: ubuntu-latest
-    if: github.repository_owner == 'ZapSquared'
+    if: github.repository_owner == 'ZPTXDev'
     steps:
     - uses: actions/checkout@v2
-    - uses: crowdin/github-action@1.4.8
+    - uses: crowdin/github-action@1.4.10
       with:
         download_translations: true
         skip_untranslated_strings: true
@@ -20,7 +20,7 @@ jobs:
         crowdin_branch_name: 'next'
         create_pull_request: true
         pull_request_title: 'chore(locales): new Crowdin translations'
-        pull_request_labels: 'affects:locale, priority:p2'
+        pull_request_labels: 'affects:locale, priority:p2, status:proposed, type:enhancement'
         pull_request_base_branch_name: next
         base_url: 'https://zapsquared.crowdin.com'
       env:

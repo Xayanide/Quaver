@@ -4,8 +4,8 @@ const { Permissions } = require('discord.js');
 const { checks } = require('../enums.js');
 const { defaultLocale } = require('../settings.json');
 const { getLocale } = require('../functions.js');
-const { logger, guildData } = require('../shared.js');
-const MusicHandler = require('../classes/MusicHandler.js');
+const { logger, data } = require('../shared.js');
+const PlayerHandler = require('../classes/PlayerHandler.js');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -25,7 +25,12 @@ module.exports = {
 		user: [],
 		bot: [],
 	},
+	/** @param {import('discord.js').CommandInteraction & {client: import('discord.js').Client & {music: import('lavaclient').Node}, replyHandler: import('../classes/ReplyHandler.js')}} interaction */
 	async execute(interaction) {
+		if (!['GUILD_TEXT', 'GUILD_VOICE'].includes(interaction.channel.type)) {
+			await interaction.replyHandler.localeError('DISCORD_BOT_UNSUPPORTED_CHANNEL');
+			return;
+		}
 		// check for connect, speak permission for channel
 		const permissions = interaction.member.voice.channel.permissionsFor(interaction.client.user.id);
 		if (!permissions.has(['VIEW_CHANNEL', 'CONNECT', 'SPEAK'])) {
@@ -82,6 +87,12 @@ module.exports = {
 					extras = [track.info.title, track.info.uri];
 					break;
 				}
+				case 'NO_MATCHES':
+					await interaction.replyHandler.localeError('CMD_PLAY_NO_RESULTS');
+					return;
+				case 'LOAD_FAILED':
+					await interaction.replyHandler.localeError('CMD_PLAY_LOAD_FAILED');
+					return;
 				default:
 					await interaction.replyHandler.localeError('DISCORD_CMD_ERROR');
 					return;
@@ -91,18 +102,18 @@ module.exports = {
 		let player = interaction.client.music.players.get(interaction.guildId);
 		if (!player?.connected) {
 			player = interaction.client.music.createPlayer(interaction.guildId);
-			player.musicHandler = new MusicHandler(player);
+			player.handler = new PlayerHandler(interaction.client, player);
 			player.queue.channel = interaction.channel;
 			await player.connect(interaction.member.voice.channelId, { deafened: true });
 			// that kid left while we were busy bruh
 			if (!interaction.member.voice.channelId) {
 				await interaction.replyHandler.locale('DISCORD_INTERACTION_CANCELED', {}, interaction.user.id);
-				await player.musicHandler.disconnect();
+				await player.handler.disconnect();
 				return;
 			}
 			if (interaction.member.voice.channel.type === 'GUILD_STAGE_VOICE' && !interaction.member.voice.channel.stageInstance?.topic) {
 				try {
-					await interaction.member.voice.channel.createStageInstance({ topic: getLocale(guildData.get(`${interaction.guildId}.locale`) ?? defaultLocale, 'MUSIC_STAGE_TOPIC'), privacyLevel: 'GUILD_ONLY' });
+					await interaction.member.voice.channel.createStageInstance({ topic: getLocale(await data.guild.get(interaction.guildId, 'settings.locale') ?? defaultLocale, 'MUSIC_STAGE_TOPIC'), privacyLevel: 'GUILD_ONLY' });
 				}
 				catch (err) {
 					logger.error({ message: `${err.message}\n${err.stack}`, label: 'Quaver' });
@@ -116,7 +127,7 @@ module.exports = {
 		player.queue.add(tracks, { requester: interaction.user.id, next: insert });
 
 		const started = player.playing || player.paused;
-		await interaction.replyHandler.locale(msg, { footer: started ? `${getLocale(guildData.get(`${interaction.guildId}.locale`) ?? defaultLocale, 'MISC_POSITION')}: ${firstPosition}${endPosition !== firstPosition ? ` - ${endPosition}` : ''}` : '' }, ...extras);
+		await interaction.replyHandler.locale(msg, { footer: started ? `${getLocale(await data.guild.get(interaction.guildId, 'settings.locale') ?? defaultLocale, 'MISC_POSITION')}: ${firstPosition}${endPosition !== firstPosition ? ` - ${endPosition}` : ''}` : '' }, ...extras);
 		if (!started) { await player.queue.start(); }
 		const state = interaction.guild.members.cache.get(interaction.client.user.id).voice;
 		if (interaction.member.voice.channel.type === 'GUILD_STAGE_VOICE' && state.suppress) {
