@@ -12,7 +12,16 @@ module.exports = {
 			return;
 		}
 		// rare case where the bot sets timeout after setting pause timeout
-		if (queue.player.pauseTimeout) return;
+		if (queue.player.pauseTimeout) {
+			// if there are no humans in the channel disconnect
+			if (queue.player.handler.voiceChannel?.members.filter(m => !m.user.bot).size <= 0) {
+				logger.info({ message: `[G ${queue.player.guildId}] Disconnecting (alone)`, label: 'Quaver' });
+				await queue.player.handler.locale('MUSIC_ALONE');
+				await queue.player.handler.disconnect();
+				return;
+			}
+			return;
+		}
 		logger.info({ message: `[G ${queue.player.guildId}] Setting timeout`, label: 'Quaver' });
 		if (queue.player.timeout) {
 			clearTimeout(queue.player.timeout);
