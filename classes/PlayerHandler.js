@@ -26,9 +26,9 @@ module.exports = class PlayerHandler {
 		this.client.music.destroyPlayer(this.player.guildId);
 		const voiceChannel = this.client.guilds.cache.get(this.player.guildId)?.channels.cache.get(channelId ?? this.player.channelId);
 		if (voiceChannel?.type === 'GUILD_STAGE_VOICE') {
-			const permissions = this.client.guilds.cache.get(this.player.guildId).channels.cache.get(channelId ?? this.player.channelId).permissionsFor(this.client.user.id);
-			if (!permissions.has(['VIEW_CHANNEL', 'CONNECT', 'SPEAK'])) return;
-			if (!permissions.has(Permissions.STAGE_MODERATOR)) return;
+			const permissions = this.client.guilds.cache.get(this.player.guildId)?.channels.cache.get(channelId ?? this.player.channelId).permissionsFor(this.client.user.id);
+			if (!permissions?.has(['VIEW_CHANNEL', 'CONNECT', 'SPEAK'])) return;
+			if (!permissions?.has(Permissions.STAGE_MODERATOR)) return;
 			if (voiceChannel.stageInstance?.topic === getLocale(await data.guild.get(this.player.guildId, 'settings.locale') ?? defaultLocale, 'MUSIC_STAGE_TOPIC')) {
 				try {
 					await voiceChannel.stageInstance.delete();
@@ -76,7 +76,7 @@ module.exports = class PlayerHandler {
 		const sendData = this.sendDataConstructor(msg, embedExtras, error);
 		/** @type {import('discord.js').TextChannel} */
 		const channel = this.player.queue.channel;
-		if (!channel.permissionsFor(this.client.user.id).has(['VIEW_CHANNEL', 'SEND_MESSAGES'])) return false;
+		if (!channel?.permissionsFor(this.client.user.id)?.has(['VIEW_CHANNEL', 'SEND_MESSAGES'])) return false;
 		if (this.client.guilds.cache.get(this.player.guildId).members.cache.get(this.client.user.id).isCommunicationDisabled()) return false;
 		try {
 			return await channel.send(sendData);
