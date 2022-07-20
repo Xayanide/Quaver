@@ -1,4 +1,4 @@
-const { Permissions } = require('discord.js');
+const { PermissionsBitField, ChannelType } = require('discord.js');
 const { data } = require('../../shared.js');
 const { getLocale } = require('../../functions.js');
 const { checks } = require('../../enums.js');
@@ -25,15 +25,15 @@ module.exports = {
 		}
 		// check for connect, speak permission for channel
 		const permissions = interaction.member?.voice.channel.permissionsFor(interaction.client.user.id);
-		if (!permissions.has(['VIEW_CHANNEL', 'CONNECT', 'SPEAK'])) {
+		if (!permissions.has(new PermissionsBitField([PermissionsBitField.Flags.ViewChannel, PermissionsBitField.Flags.Connect, PermissionsBitField.Flags.Speak]))) {
 			await interaction.replyHandler.localeError('DISCORD_BOT_MISSING_PERMISSIONS_BASIC');
 			return;
 		}
-		if (interaction.member?.voice.channel.type === 'GUILD_STAGE_VOICE' && !permissions.has(Permissions.STAGE_MODERATOR)) {
+		if (interaction.member?.voice.channel.type === ChannelType.GuildStageVoice && !permissions.has(PermissionsBitField.StageModerator)) {
 			await interaction.replyHandler.localeError('DISCORD_BOT_MISSING_PERMISSIONS_STAGE');
 			return;
 		}
-		if (interaction.guild.members.cache.get(interaction.client.user.id).isCommunicationDisabled()) {
+		if (interaction.guild.members.me.isCommunicationDisabled()) {
 			await interaction.replyHandler.localeError('DISCORD_BOT_TIMED_OUT');
 			return;
 		}
@@ -60,10 +60,13 @@ module.exports = {
 			player.handler = new PlayerHandler(interaction.client, player);
 			player.queue.channel = interaction.channel;
 			await player.connect(interaction.member.voice.channelId, { deafened: true });
-			// that kid left while we were busy bruh
-			if (!interaction.member.voice.channelId) {
+			// Ensure that Quaver destroys the player if the user leaves the channel while Quaver is queuing tracks
+			// Ensure that Quaver destroys the player if Quaver gets timed out by the user while Quaver is queuing tracks
+			// Ensure that Quaver destroys the player if Quaver gets kicked or banned by the user while Quaver is queuing tracks
+			const timedOut = interaction.guild?.members.me.isCommunicationDisabled();
+			if (!interaction.member.voice.channelId || timedOut || !interaction.guild) {
+				if (interaction.guild) timedOut ? await interaction.replyHandler.localeError('DISCORD_BOT_TIMED_OUT', { components: [] }) : await interaction.replyHandler.locale('DISCORD_INTERACTION_CANCELED', { components: [] }, interaction.user.id);
 				await player.handler.disconnect();
-				await interaction.replyHandler.locale('DISCORD_INTERACTION_CANCELED', { components: [] }, interaction.user.id);
 				return;
 			}
 		}
@@ -73,11 +76,7 @@ module.exports = {
 		player.queue.add(resolvedTracks, { requester: interaction.user.id });
 
 		const started = player.playing || player.paused;
-		await interaction.replyHandler.locale(msg, { footer: started ? `${getLocale(await data.guild.get(interaction.guildId, 'settings.locale') ?? defaultLocale, 'MISC_POSITION')}: ${firstPosition}${endPosition !== firstPosition ? ` - ${endPosition}` : ''}` : '', components: [] }, ...extras);
+		await interaction.replyHandler.locale(msg, { footer: started ? `${getLocale(await data.guild.get(interaction.guildId, 'settings.locale') ?? defaultLocale, 'MISC_POSITION')}: ${firstPosition}${endPosition !== firstPosition ? ` - ${endPosition}` : ''}` : null, components: [] }, ...extras);
 		if (!started) { await player.queue.start(); }
-		const state = interaction.guild.members.cache.get(interaction.client.user.id).voice;
-		if (state.channel.type === 'GUILD_STAGE_VOICE' && state.suppress) {
-			await state.setSuppressed(false);
-		}
 	},
 };
