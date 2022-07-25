@@ -2,7 +2,7 @@
 // Commands are deployed globally by default.
 // This means that it may take a little bit of time before your commands can be seen on all guilds.
 
-require('dotenv').config();
+require('dotenv/config');
 const fs = require('fs');
 const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v9');

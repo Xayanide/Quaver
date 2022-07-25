@@ -1,5 +1,5 @@
 require('@lavaclient/queue/register');
-require('dotenv').config();
+require('dotenv/config');
 const { Client, GatewayIntentBits, Collection } = require('discord.js');
 const { Node } = require('lavaclient');
 const { load } = require('@lavaclient/spotify');

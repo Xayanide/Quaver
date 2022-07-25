@@ -1,6 +1,6 @@
 // To be run once.
 
-require('dotenv').config();
+require('dotenv/config');
 const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v9');
 const { applicationId, token } = require('./settings.json');
