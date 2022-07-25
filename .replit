@@ -1,1 +1,1 @@
-run = "node main.js"
+run = "bash run.sh"

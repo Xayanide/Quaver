@@ -18,5 +18,9 @@
 in {
     deps = [
         pkgs.nodejs-18_x
+        pkgs.bashInteractive
+        pkgs.unzip
+        pkgs.htop
+        pkgs.busybox
     ];
 }

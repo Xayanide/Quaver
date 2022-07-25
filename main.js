@@ -5,7 +5,7 @@ const { Node } = require('lavaclient');
 const { load } = require('@lavaclient/spotify');
 const fs = require('fs');
 const fsPromises = require('fs').promises;
-const readline = require('readline');
+// const readline = require('readline');
 const { token, lavalink, spotify, defaultLocale, features } = require('./settings.json');
 const { msToTime, msToTimeString, getLocale } = require('./functions.js');
 const { logger, data } = require('./shared.js');
@@ -17,6 +17,7 @@ if (process.env.REPLIT_DB_URL !== undefined) {
 	startHttpServer();
 }
 
+/*
 const rl = readline.createInterface({
 	input: process.stdin,
 	output: process.stdout,
@@ -71,6 +72,7 @@ rl.on('line', async input => {
 });
 // 'close' event catches ctrl+c, therefore we pass it to shuttingDown as a ctrl+c event
 rl.on('close', async () => await shuttingDown('SIGINT'));
+*/
 
 load({
 	client: {
