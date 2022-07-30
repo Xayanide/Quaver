@@ -3,6 +3,7 @@
 #		nodejs-16_x
 #	];
 # }
+hidden=['database.sqlite']
 { pkgs }: let
     nixpkgs = builtins.fetchTarball {
         url = "https://github.com/NixOS/nixpkgs/archive/nixos-22.05.tar.gz";
