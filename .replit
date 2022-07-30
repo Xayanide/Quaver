@@ -1,1 +1,2 @@
+hidden=['database.sqlite']
 run = "node main.js"
