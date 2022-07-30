@@ -151,6 +151,7 @@ async function shuttingDown(eventType, err) {
 						},
 					] : [],
 				},
+				'warning',
 			);
 			if (!success) continue;
 		}
