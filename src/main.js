@@ -1,4 +1,4 @@
-import 'dotenv/config';
+// import 'dotenv/config';
 import '@lavaclient/queue/register';
 import { Client, GatewayIntentBits, Collection } from 'discord.js';
 import { Node } from 'lavaclient';

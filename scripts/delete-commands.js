@@ -1,6 +1,6 @@
 // To be run once.
 
-import 'dotenv/config';
+// import 'dotenv/config';
 import { REST } from '@discordjs/rest';
 import { Routes } from 'discord-api-types/v10';
 import { token, applicationId } from '#settings';

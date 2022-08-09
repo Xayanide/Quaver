@@ -2,7 +2,7 @@
 // Commands are deployed globally by default.
 // This means that it may take a little bit of time before your commands can be seen on all guilds.
 
-import 'dotenv/config';
+// import 'dotenv/config';
 import { readdirSync } from 'fs';
 import { REST } from '@discordjs/rest';
 import { Routes } from 'discord-api-types/v10';
