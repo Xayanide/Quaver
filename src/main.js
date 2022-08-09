@@ -20,7 +20,6 @@ export let startup = false;
 export function updateStartup() {
 	startup = true;
 }
-
 const rl = createInterface({
 	input: process.stdin,
 	output: process.stdout,
@@ -176,7 +175,9 @@ export async function shuttingDown(eventType, err) {
 			}
 		}
 		bot.destroy();
-		if (err.includes('429') || /429/g.test(err)) execSync('kill 1');
+		if (err?.includes('429') || /429/g.test(err)) {
+			if (process.env.REPLIT_DB_URL) execSync('kill 1');
+		}
 		process.exit();
 	}
 }

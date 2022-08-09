@@ -28,7 +28,8 @@
     "slash-deploy": "node scripts/deploy-commands.js",
     "slash-delete": "node scripts/delete-commands.js",
     "migrate": "node scripts/migrate.js",
-    "start": "genversion --es6 --semi lib/util/version.js && node ."
+    "start": "genversion --es6 --semi lib/util/version.js && node .",
+    "dev": "genversion --es6 --semi lib/util/version.js && node . --debug"
   },
   "imports": {
     "#lib/*": "./lib/*",
