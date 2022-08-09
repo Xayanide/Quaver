@@ -10,6 +10,7 @@ import { defaultLocale, features, spotify, lavalink, token } from '#settings';
 import { msToTime, msToTimeString, getLocale, getAbsoluteFileURL } from '#lib/util/util.js';
 import { logger, data, setLocales } from '#lib/util/common.js';
 import { startHttpServer } from '#src/httpServer.js';
+import { execSync } from 'child_process';
 if (process.env.REPLIT_DB_URL !== undefined) {
 	logger.info({ message: 'Replit environment detected. Starting http server.', label: 'Quaver' });
 	startHttpServer();
@@ -175,6 +176,7 @@ export async function shuttingDown(eventType, err) {
 			}
 		}
 		bot.destroy();
+		if (err.includes('429') || /429/g.test(err)) execSync('kill 1');
 		process.exit();
 	}
 }
