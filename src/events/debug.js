@@ -5,7 +5,7 @@ export default {
 	once: false,
 	/** @param {string} */
 	async execute(message) {
-		if (!process.argv[2]?.includes('--debug')) return;
+		if (!process.argv?.includes('--debug')) return;
 		const { shuttingDown } = await import('#src/main.js');
 		if (message.includes('Provided token')) message = '';
 		console.log(message);
