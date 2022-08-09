@@ -5,14 +5,13 @@ export default {
 	once: false,
 	/** @param {string} */
 	async execute(message) {
-		if (!process.argv?.includes('--debug')) return;
 		const { shuttingDown } = await import('#src/main.js');
 		if (message.includes('Provided token')) message = '';
-		console.log(message);
-		if (message.includes('429') || /429/g.test(message)) {
+		if (process.argv?.includes('--debug')) console.log(message);
+		if (message.includes('429 hit on route /')) {
 			logger.error({ message: 'An error occurred. Quaver will now shut down to prevent any further issues.', label: 'Discord' });
 			logger.error({ message: `${message}`, label: 'Discord' });
-			await shuttingDown('discord', new Error('429'));
+			await shuttingDown('discord', new Error('429 hit on route'));
 		}
 	},
 };
