@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import '@lavaclient/queue/register';
 import { Client, GatewayIntentBits, Collection } from 'discord.js';
 import { Node } from 'lavaclient';
@@ -8,6 +9,11 @@ import { createInterface } from 'readline';
 import { defaultLocale, features, spotify, lavalink, token } from '#settings';
 import { msToTime, msToTimeString, getLocale, getAbsoluteFileURL } from '#lib/util/util.js';
 import { logger, data, setLocales } from '#lib/util/common.js';
+import { startHttpServer } from '#src/httpServer.js';
+if (process.env.REPLIT_DB_URL !== undefined) {
+	logger.info({ message: 'Replit environment detected. Starting http server.', label: 'Quaver' });
+	startHttpServer();
+}
 
 export let startup = false;
 export function updateStartup() {
@@ -71,10 +77,10 @@ rl.on('close', async () => shuttingDown('SIGINT'));
 
 load({
 	client: {
-		id: spotify.client_id,
-		secret: spotify.client_secret,
+		id: process.env.SPOTIFY_CLIENT_ID ? process.env.SPOTIFY_CLIENT_ID : spotify.client_id,
+		secret: process.env.SPOTIFY_CLIENT_SECRET ? process.env.SPOTIFY_CLIENT_SECRET : spotify.client_secret,
 	},
-	autoResolveYoutubeTracks: false,
+	autoResolveYoutubeTracks: !!process.env.SPOTIFY_AUTO_RESOLVE_YT,
 });
 
 /**
@@ -91,13 +97,13 @@ export const bot = new Client({ intents: [GatewayIntentBits.Guilds, GatewayInten
 bot.commands = new Collection();
 bot.music = new Node({
 	connection: {
-		host: lavalink.host,
-		port: lavalink.port,
-		password: lavalink.password,
-		secure: !!lavalink.secure,
+		host: process.env.LAVA_HOST ? process.env.LAVA_HOST : lavalink.host,
+		port: process.env.LAVA_PORT ? process.env.LAVA_PORT : lavalink.port,
+		password: process.env.LAVA_PASS ? process.env.LAVA_PASS : lavalink.password,
+		secure: process.env.LAVA_SECURE ? !!process.env.LAVA_SECURE : !!lavalink.secure,
 		reconnect: {
-			delay: lavalink.reconnect.delay ?? 3000,
-			tries: lavalink.reconnect.tries ?? 5,
+			delay: process.env.LAVA_RECONNECT_DELAY ? process.env.LAVA_RECONNECT_DELAY ?? 3000 : lavalink.reconnect.delay ?? 3000,
+			tries: process.env.LAVA_RECONNECT_TRIES ? process.env.LAVA_RECONNECT_TRIES ?? 5 : lavalink.reconnect.tries ?? 5,
 		},
 	},
 	sendGatewayPayload: (id, payload) => bot.guilds.cache.get(id)?.shard?.send(payload),
@@ -228,7 +234,7 @@ for await (const file of musicEventFiles) {
 	}
 }
 
-bot.login(token);
+bot.login(process.env.BOT_TOKEN ? process.env.BOT_TOKEN : token);
 
 ['exit', 'SIGINT', 'SIGUSR1', 'SIGUSR2', 'SIGTERM', 'uncaughtException', 'unhandledRejection'].forEach(eventType => {
 	process.on(eventType, async err => shuttingDown(eventType, err));

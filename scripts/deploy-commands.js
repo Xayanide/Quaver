@@ -2,6 +2,7 @@
 // Commands are deployed globally by default.
 // This means that it may take a little bit of time before your commands can be seen on all guilds.
 
+import 'dotenv/config';
 import { readdirSync } from 'fs';
 import { REST } from '@discordjs/rest';
 import { Routes } from 'discord-api-types/v10';
@@ -31,11 +32,11 @@ for await (const file of commandFiles) {
 	commands.push(command.default.data.toJSON());
 }
 
-const rest = new REST({ version: '10' }).setToken(token);
+const rest = new REST({ version: '10' }).setToken(process.BOT_TOKEN || token);
 
 try {
 	await rest.put(
-		Routes.applicationCommands(applicationId),
+		Routes.applicationCommands(process.env.BOT_CLIENT_ID || applicationId),
 		{ body: commands },
 	);
 	console.log('Successfully registered application commands.');

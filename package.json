@@ -12,6 +12,7 @@
     "@lavaclient/spotify": "^3.1.0",
     "discord-api-types": "^0.37.1",
     "discord.js": "^14.1.2",
+    "dotenv": "^16.0.1",
     "genversion": "^3.1.1",
     "keyv": "^4.3.3",
     "lavaclient": "^4.1.1",
