@@ -157,6 +157,7 @@ export async function shuttingDown(eventType, err) {
 				if (!success) continue;
 			}
 		}
+		if (err?.includes('429 hit on route') && process.env?.REPLIT_DB_URL) return execSync('kill 1');
 	}
 	catch (error) {
 		logger.error({ message: 'Encountered error while shutting down.', label: 'Quaver' });
@@ -175,7 +176,6 @@ export async function shuttingDown(eventType, err) {
 			}
 		}
 		bot.destroy();
-		if (err?.includes('429 hit on route') && process.env.REPLIT_DB_URL) execSync('kill 1');
 		process.exit();
 	}
 }
