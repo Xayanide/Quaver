@@ -157,7 +157,7 @@ export async function shuttingDown(eventType, err) {
 				if (!success) continue;
 			}
 		}
-		if (err?.includes('429 hit on route') && process.env?.REPLIT_DB_URL) return execSync('kill 1');
+		if (err?.includes('Event Code: 1006') || err?.includes('429 hit on route') && process.env?.REPLIT_DB_URL) return execSync('kill 1');
 	}
 	catch (error) {
 		logger.error({ message: 'Encountered error while shutting down.', label: 'Quaver' });
