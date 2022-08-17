@@ -23,8 +23,8 @@ export const managers = [
 export const database = {
 	// The protocol. For example, sqlite would use sqlite://.
 	protocol: 'sqlite',
-	// The location. For example, database.sqlite would use the database.sqlite file.
-	location: 'database.sqlite',
+	// The path relative to the base directory. For example, database.sqlite would use the database.sqlite file.
+	path: 'database.sqlite',
 };
 // Lavalink settings.
 export const lavalink = {
@@ -43,20 +43,24 @@ export const lavalink = {
 		tries: 5,
 	},
 };
-// Spotify settings, used to resolve Spotify tracks.
-export const spotify = {
-	// Spotify API Client ID, obtainable at https://developer.spotify.com/dashboard/applications.
-	client_id: 'Paste Spotify Client ID here',
-	// Spotify API Client Secret, obtainable at https://developer.spotify.com/dashboard/applications.
-	client_secret: 'Paste Spotify Client Secret here',
-};
 // Configurable features.
 export const features = {
 	// 24/7 feature
+	// Allows users to make Quaver stay in their voice channel regardless of activity.
 	stay: {
 		// Whether or not the feature is enabled.
 		enabled: true,
 		// Whether or not the feature requires guilds to be whitelisted.
 		whitelist: false,
+	},
+	// Spotify feature
+	// Allows users to use Spotify URIs to play music.
+	spotify: {
+		// Whether or not the feature is enabled.
+		enabled: true,
+		// Spotify API Client ID, obtainable at https://developer.spotify.com/dashboard/applications.
+		client_id: 'Paste Spotify Client ID here',
+		// Spotify API Client Secret, obtainable at https://developer.spotify.com/dashboard/applications.
+		client_secret: 'Paste Spotify Client Secret here',
 	},
 };

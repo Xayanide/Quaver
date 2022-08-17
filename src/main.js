@@ -6,7 +6,7 @@ import { load } from '@lavaclient/spotify';
 import { readdirSync } from 'fs';
 import { writeFile } from 'fs/promises';
 import { createInterface } from 'readline';
-import { defaultLocale, features, spotify, lavalink, token } from '#settings';
+import { defaultLocale, features, lavalink, token } from '#settings';
 import { msToTime, msToTimeString, getLocale, getAbsoluteFileURL } from '#lib/util/util.js';
 import { logger, data, setLocales } from '#lib/util/common.js';
 import { startHttpServer } from '#src/httpServer.js';
@@ -75,13 +75,15 @@ rl.on('line', async input => {
 // 'close' event catches ctrl+c, therefore we pass it to shuttingDown as a ctrl+c event
 rl.on('close', async () => shuttingDown('SIGINT'));
 
-load({
-	client: {
-		id: process.env.SPOTIFY_CLIENT_ID ? process.env.SPOTIFY_CLIENT_ID : spotify.client_id,
-		secret: process.env.SPOTIFY_CLIENT_SECRET ? process.env.SPOTIFY_CLIENT_SECRET : spotify.client_secret,
-	},
-	autoResolveYoutubeTracks: !!process.env.SPOTIFY_AUTO_RESOLVE_YT,
-});
+if (features.spotify.enabled) {
+	load({
+		client: {
+			id: process.env.SPOTIFY_CLIENT_ID ? process.env.SPOTIFY_CLIENT_ID : spotify.client_id,
+			secret: process.env.SPOTIFY_CLIENT_SECRET ? process.env.SPOTIFY_CLIENT_SECRET : spotify.client_secret,
+		},
+		autoResolveYoutubeTracks: !!process.env.SPOTIFY_AUTO_RESOLVE_YT,
+	});
+}
 
 /**
  * Handles database connection errors from Keyv.
