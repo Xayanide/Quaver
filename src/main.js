@@ -78,7 +78,7 @@ rl.on('line', async input => {
 rl.on('close', async () => shuttingDown('SIGINT'));
 
 let httpServer;
-if (features.web.https) {
+if (features.web.https.enabled) {
 	httpServer = createServer({
 		key: readFileSync(getAbsoluteFileURL(import.meta.url, ['..', ...features.web.https.key.split('/')])),
 		cert: readFileSync(getAbsoluteFileURL(import.meta.url, ['..', ...features.web.https.cert.split('/')])),
@@ -274,7 +274,7 @@ for await (const file of musicEventFiles) {
 
 if (features.web.enabled) setInterval(() => bot.emit('timer'), 500);
 
-bot.login(token);
+await bot.login(token);
 
 ['exit', 'SIGINT', 'SIGUSR1', 'SIGUSR2', 'SIGTERM', 'uncaughtException', 'unhandledRejection'].forEach(eventType => {
 	process.on(eventType, async err => shuttingDown(eventType, err));

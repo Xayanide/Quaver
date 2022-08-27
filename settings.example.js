@@ -81,6 +81,7 @@ export const features = {
 		encryptionKey: process.env.WEB_ENCRYPT_KEY || 'Type an encryption key here',
 		// Key and cert files for HTTPS (remove this property if you do not need HTTPS).
 		https: {
+			enabled: false,
 			key: 'key.pem',
 			cert: 'cert.pem',
 		},
