@@ -9,6 +9,7 @@ export default {
 	/** @param {import('discord.js').Client & {music: import('lavaclient').Node}} client */
 	async execute(client) {
 		const { startup, updateStartup, io } = await import('#src/main.js');
+		client.user.setActivity(`music | ${version}`, { type: ActivityType.Listening });
 		if (!startup) {
 			logger.info({ message: `Connected. Logged in as ${client.user.tag}.`, label: 'Discord' });
 			logger.info({ message: `Running version ${version}. For help, see https://github.com/ZPTXDev/Quaver/issues.`, label: 'Quaver' });
@@ -26,6 +27,5 @@ export default {
 			await player.resume();
 			if (features.web.enabled) io.to(`guild:${player.guildId}`).emit('pauseUpdate', player.paused);
 		}
-		client.user.setActivity(`music | ${version}`, { type: ActivityType.Listening });
 	},
 };
