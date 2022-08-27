@@ -1,8 +1,7 @@
 import { SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
 import { defaultLocale } from '#settings';
 import { checks } from '#lib/util/constants.js';
-import { paginate, getLocale, msToTime, msToTimeString } from '#lib/util/util.js';
-import { data } from '#lib/util/common.js';
+import { paginate, getLocale, msToTime, msToTimeString, getGuildLocale } from '#lib/util/util.js';
 
 export default {
 	data: new SlashCommandBuilder()
@@ -16,19 +15,16 @@ export default {
 	/** @param {import('discord.js').ChatInputCommandInteraction & {client: import('discord.js').Client & {music: import('lavaclient').Node}, replyHandler: import('#lib/ReplyHandler.js').default}} interaction */
 	async execute(interaction) {
 		const player = interaction.client.music.players.get(interaction.guildId);
-		if (player.queue.tracks.length === 0) {
-			await interaction.replyHandler.locale('CMD.QUEUE.RESPONSE.QUEUE_EMPTY', {}, 'error');
-			return;
-		}
+		if (player.queue.tracks.length === 0) return interaction.replyHandler.locale('CMD.QUEUE.RESPONSE.QUEUE_EMPTY', {}, 'error');
 		const pages = paginate(player.queue.tracks, 5);
-		await interaction.replyHandler.reply(
+		return interaction.replyHandler.reply(
 			pages[0].map((track, index) => {
 				const duration = msToTime(track.length);
 				const durationString = track.isStream ? '∞' : msToTimeString(duration, true);
 				return `\`${index + 1}.\` **[${track.title}](${track.uri})** \`[${durationString}]\` <@${track.requester}>`;
 			}).join('\n'),
 			{
-				footer: getLocale(await data.guild.get(interaction.guildId, 'settings.locale') ?? defaultLocale, 'MISC.PAGE', '1', pages.length),
+				footer: await getGuildLocale(interaction.guildId, 'MISC.PAGE', '1', pages.length),
 				components: [
 					new ActionRowBuilder()
 						.addComponents(
@@ -46,7 +42,7 @@ export default {
 								.setCustomId('queue_1')
 								.setEmoji('🔁')
 								.setStyle(ButtonStyle.Secondary)
-								.setLabel(getLocale(await data.guild.get(interaction.guildId, 'settings.locale') ?? defaultLocale, 'MISC.REFRESH')),
+								.setLabel(await getGuildLocale(interaction.guildId, 'MISC.REFRESH')),
 						),
 				],
 			},

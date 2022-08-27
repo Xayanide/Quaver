@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from 'discord.js';
-import { defaultLocale } from '#settings';
+import { defaultLocale, features } from '#settings';
 import { checks } from '#lib/util/constants.js';
 import { getLocale } from '#lib/util/util.js';
 
@@ -14,17 +14,21 @@ export default {
 	},
 	/** @param {import('discord.js').ChatInputCommandInteraction & {client: import('discord.js').Client & {music: import('lavaclient').Node}, replyHandler: import('#lib/ReplyHandler.js').default}} interaction */
 	async execute(interaction) {
+		const { bot, io } = await import('#src/main.js');
 		const player = interaction.client.music.players.get(interaction.guildId);
-		if (player.queue.tracks.length <= 1) {
-			await interaction.replyHandler.locale('CMD.SHUFFLE.RESPONSE.QUEUE_INSUFFICIENT_TRACKS', {}, 'error');
-			return;
-		}
+		if (player.queue.tracks.length <= 1) return interaction.replyHandler.locale('CMD.SHUFFLE.RESPONSE.QUEUE_INSUFFICIENT_TRACKS', {}, 'error');
 		let currentIndex = player.queue.tracks.length, randomIndex;
 		while (currentIndex !== 0) {
 			randomIndex = Math.floor(Math.random() * currentIndex);
 			currentIndex--;
 			[player.queue.tracks[currentIndex], player.queue.tracks[randomIndex]] = [player.queue.tracks[randomIndex], player.queue.tracks[currentIndex]];
 		}
-		await interaction.replyHandler.locale('CMD.SHUFFLE.RESPONSE.SUCCESS', {}, 'success');
+		if (features.web.enabled) {
+			io.to(`guild:${player.guildId}`).emit('queueUpdate', player.queue.tracks.map(t => {
+				t.requesterTag = bot.users.cache.get(t.requester)?.tag;
+				return t;
+			}));
+		}
+		return interaction.replyHandler.locale('CMD.SHUFFLE.RESPONSE.SUCCESS', {}, 'success');
 	},
 };

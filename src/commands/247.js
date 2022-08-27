@@ -1,7 +1,7 @@
 import { SlashCommandBuilder } from 'discord.js';
 import { defaultLocale, features } from '#settings';
 import { checks } from '#lib/util/constants.js';
-import { getLocale } from '#lib/util/util.js';
+import { getGuildLocale, getLocale } from '#lib/util/util.js';
 import { data } from '#lib/util/common.js';
 
 export default {
@@ -19,27 +19,13 @@ export default {
 	},
 	/** @param {import('discord.js').ChatInputCommandInteraction & {client: import('discord.js').Client & {music: import('lavaclient').Node}, replyHandler: import('#lib/ReplyHandler.js').default}} interaction */
 	async execute(interaction) {
-		if (!features.stay.enabled) {
-			await interaction.replyHandler.locale('FEATURE.DISABLED.DEFAULT', {}, 'error');
-			return;
-		}
-		if (features.stay.whitelist && !await data.guild.get(interaction.guildId, 'features.stay.whitelisted')) {
-			await interaction.replyHandler.locale('CMD.247.RESPONSE.FEATURE_NOT_WHITELISTED', {}, 'error');
-			return;
-		}
+		const { io } = await import('#src/main.js');
+		if (!features.stay.enabled) return interaction.replyHandler.locale('FEATURE.DISABLED.DEFAULT', {}, 'error');
+		if (features.stay.whitelist && !await data.guild.get(interaction.guildId, 'features.stay.whitelisted')) return interaction.replyHandler.locale('CMD.247.RESPONSE.FEATURE_NOT_WHITELISTED', {}, 'error');
 		const player = interaction.client.music.players.get(interaction.guildId);
-		if (!player?.queue?.channel?.id) {
-			await interaction.replyHandler.locale('CMD.247.RESPONSE.QUEUE_CHANNEL_MISSING', {}, 'error');
-			return;
-		}
+		if (!player?.queue?.channel?.id) return interaction.replyHandler.locale('CMD.247.RESPONSE.QUEUE_CHANNEL_MISSING', {}, 'error');
 		const enabled = interaction.options.getBoolean('enabled');
-		let always;
-		if (enabled !== null) {
-			always = enabled;
-		}
-		else {
-			always = !await data.guild.get(interaction.guildId, 'settings.stay.enabled');
-		}
+		const always = enabled !== null ? enabled : !await data.guild.get(interaction.guildId, 'settings.stay.enabled');
 		await data.guild.set(interaction.guildId, 'settings.stay.enabled', always);
 		if (always) {
 			await data.guild.set(interaction.guildId, 'settings.stay.channel', player.channelId);
@@ -48,9 +34,11 @@ export default {
 		if (player.timeout) {
 			clearTimeout(player.timeout);
 			delete player.timeout;
+			if (features.web.enabled) io.to(`guild:${player.guildId}`).emit('timeoutUpdate', !!player.timeout);
 		}
 		// pause timeout is theoretically impossible because the user would need to be in the same vc as Quaver
 		// and pause timeout is only set when everyone leaves
-		await interaction.replyHandler.locale(always ? 'CMD.247.RESPONSE.ENABLED' : 'CMD.247.RESPONSE.DISABLED', { footer: always ? getLocale(await data.guild.get(interaction.guildId, 'settings.locale') ?? defaultLocale, 'CMD.247.MISC.NOTE') : null });
+		await interaction.replyHandler.locale(always ? 'CMD.247.RESPONSE.ENABLED' : 'CMD.247.RESPONSE.DISABLED', { footer: always ? await getGuildLocale(interaction.guildId, 'CMD.247.MISC.NOTE') : null });
+		if (!always && !player.playing) player.queue.emit('finish');
 	},
 };

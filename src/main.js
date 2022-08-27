@@ -2,14 +2,16 @@
 import '@lavaclient/queue/register';
 import { Client, GatewayIntentBits, Collection } from 'discord.js';
 import { Node } from 'lavaclient';
+import { Server } from 'socket.io';
 import { load } from '@lavaclient/spotify';
-import { readdirSync } from 'fs';
+import { readdirSync, readFileSync } from 'fs';
 import { writeFile } from 'fs/promises';
 import { createInterface } from 'readline';
 import { defaultLocale, features, lavalink, token } from '#settings';
 import { msToTime, msToTimeString, getLocale, getAbsoluteFileURL } from '#lib/util/util.js';
 import { logger, data, setLocales } from '#lib/util/common.js';
 import { startHttpServer } from '#src/httpServer.js';
+import { createServer } from 'https';
 import { execSync } from 'child_process';
 if (process.env.REPLIT_DB_URL !== undefined) {
 	logger.info({ message: 'Replit environment detected. Starting http server.', label: 'Quaver' });
@@ -75,11 +77,36 @@ rl.on('line', async input => {
 // 'close' event catches ctrl+c, therefore we pass it to shuttingDown as a ctrl+c event
 rl.on('close', async () => shuttingDown('SIGINT'));
 
+let httpServer;
+if (features.web.https) {
+	httpServer = createServer({
+		key: readFileSync(getAbsoluteFileURL(import.meta.url, ['..', ...features.web.https.key.split('/')])),
+		cert: readFileSync(getAbsoluteFileURL(import.meta.url, ['..', ...features.web.https.cert.split('/')])),
+	});
+}
+export const io = features.web.enabled ? new Server(httpServer ?? features.web.port, { cors: { origin: features.web.allowedOrigins } }) : undefined;
+if (io) {
+	io.on('connection', async socket => {
+		const webEventFiles = readdirSync(getAbsoluteFileURL(import.meta.url, ['events', 'web'])).filter(file => file.endsWith('.js'));
+		for await (const file of webEventFiles) {
+			/** @type {{name: string, once: boolean, execute(args, callback): void | Promise<void>}} */
+			const event = await import(getAbsoluteFileURL(import.meta.url, ['events', 'web', file]));
+			if (event.default.once) {
+				socket.once(event.default.name, (args, callback) => event.default.execute(socket, ...args, callback));
+			}
+			else {
+				socket.on(event.default.name, (args, callback) => event.default.execute(socket, ...args, callback));
+			}
+		}
+	});
+}
+if (httpServer) httpServer.listen(features.web.port);
+
 if (features.spotify.enabled) {
 	load({
 		client: {
-			id: process.env.SPOTIFY_CLIENT_ID ? process.env.SPOTIFY_CLIENT_ID : spotify.client_id,
-			secret: process.env.SPOTIFY_CLIENT_SECRET ? process.env.SPOTIFY_CLIENT_SECRET : spotify.client_secret,
+			id: process.env.SPOTIFY_CLIENT_ID ? process.env.SPOTIFY_CLIENT_ID : features.spotify.client_id,
+			secret: process.env.SPOTIFY_CLIENT_SECRET ? process.env.SPOTIFY_CLIENT_SECRET : features.spotify.client_secret,
 		},
 		autoResolveYoutubeTracks: !!process.env.SPOTIFY_AUTO_RESOLVE_YT,
 	});
@@ -97,6 +124,7 @@ data.guild.instance.on('error', async err => {
 /** @type {Client & {commands: Collection, buttons: Collection, selects: Collection, music: Node}} */
 export const bot = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildPresences, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildVoiceStates] });
 bot.commands = new Collection();
+bot.autocomplete = new Collection();
 bot.music = new Node({
 	connection: {
 		host: process.env.LAVA_HOST ? process.env.LAVA_HOST : lavalink.host,
@@ -202,6 +230,13 @@ for await (const file of commandFiles) {
 	bot.commands.set(command.default.data.name, command.default);
 }
 
+const autocompleteFiles = readdirSync(getAbsoluteFileURL(import.meta.url, ['autocomplete'])).filter(file => file.endsWith('.js'));
+for await (const file of autocompleteFiles) {
+	/** @type {{name: string, execute(interaction: import('discord.js').ApplicationCommandAutocompleteInteraction): Promise<void>}} */
+	const autocomplete = await import(getAbsoluteFileURL(import.meta.url, ['autocomplete', file]));
+	bot.autocomplete.set(autocomplete.default.name, autocomplete.default);
+}
+
 const componentsFolders = readdirSync(getAbsoluteFileURL(import.meta.url, ['components']));
 for await (const folder of componentsFolders) {
 	const componentFiles = readdirSync(getAbsoluteFileURL(import.meta.url, ['components', folder])).filter(file => file.endsWith('.js'));
@@ -236,6 +271,8 @@ for await (const file of musicEventFiles) {
 		bot.music.on(event.default.name, (...args) => event.default.execute(...args));
 	}
 }
+
+if (features.web.enabled) setInterval(() => bot.emit('timer'), 500);
 
 bot.login(process.env.BOT_TOKEN ? process.env.BOT_TOKEN : token);
 

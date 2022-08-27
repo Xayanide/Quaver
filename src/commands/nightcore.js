@@ -1,8 +1,7 @@
 import { SlashCommandBuilder } from 'discord.js';
-import { defaultLocale } from '#settings';
+import { defaultLocale, features } from '#settings';
 import { checks } from '#lib/util/constants.js';
-import { getLocale } from '#lib/util/util.js';
-import { data } from '#lib/util/common.js';
+import { getGuildLocale, getLocale } from '#lib/util/util.js';
 
 export default {
 	data: new SlashCommandBuilder()
@@ -19,18 +18,14 @@ export default {
 	},
 	/** @param {import('discord.js').ChatInputCommandInteraction & {client: import('discord.js').Client & {music: import('lavaclient').Node}, replyHandler: import('#lib/ReplyHandler.js').default}} interaction */
 	async execute(interaction) {
+		const { io } = await import('#src/main.js');
 		const player = interaction.client.music.players.get(interaction.guildId);
 		const enabled = interaction.options.getBoolean('enabled');
-		let nightcore;
-		if (enabled !== null) {
-			nightcore = enabled;
-		}
-		else {
-			nightcore = !player.nightcore;
-		}
+		const nightcore = enabled !== null ? enabled : !player.nightcore;
 		player.filters.timescale = nightcore ? { speed: 1.125, pitch: 1.125, rate: 1 } : undefined;
 		await player.setFilters();
 		player.nightcore = nightcore;
-		await interaction.replyHandler.locale(player.nightcore ? 'CMD.NIGHTCORE.RESPONSE.ENABLED' : 'CMD.NIGHTCORE.RESPONSE.DISABLED', { footer: getLocale(await data.guild.get(interaction.guildId, 'settings.locale') ?? defaultLocale, 'MUSIC.PLAYER.FILTER_NOTE') }, 'neutral');
+		if (features.web.enabled) io.to(`guild:${interaction.guildId}`).emit('filterUpdate', { bassboost: player.bassboost, nightcore: player.nightcore });
+		return interaction.replyHandler.locale(player.nightcore ? 'CMD.NIGHTCORE.RESPONSE.ENABLED' : 'CMD.NIGHTCORE.RESPONSE.DISABLED', { footer: await getGuildLocale(interaction.guildId, 'MUSIC.PLAYER.FILTER_NOTE') }, 'neutral');
 	},
 };

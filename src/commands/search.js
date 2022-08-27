@@ -1,8 +1,7 @@
 import { SlashCommandBuilder, ActionRowBuilder, SelectMenuBuilder, ButtonBuilder, ButtonStyle, ChannelType } from 'discord.js';
 import { defaultLocale } from '#settings';
 import { checks } from '#lib/util/constants.js';
-import { getLocale, msToTime, msToTimeString } from '#lib/util/util.js';
-import { data } from '#lib/util/common.js';
+import { getGuildLocale, getLocale, msToTime, msToTimeString } from '#lib/util/util.js';
 
 // credit: https://github.com/lavaclient/djs-v13-example/blob/main/src/commands/Play.ts
 
@@ -22,10 +21,7 @@ export default {
 	},
 	/** @param {import('discord.js').ChatInputCommandInteraction & {client: import('discord.js').Client, replyHandler: import('#lib/ReplyHandler.js').default}} interaction */
 	async execute(interaction) {
-		if (![ChannelType.GuildText, ChannelType.GuildVoice].includes(interaction.channel.type)) {
-			await interaction.replyHandler.locale('DISCORD.CHANNEL_UNSUPPORTED', {}, 'error');
-			return;
-		}
+		if (![ChannelType.GuildText, ChannelType.GuildVoice].includes(interaction.channel.type)) return interaction.replyHandler.locale('DISCORD.CHANNEL_UNSUPPORTED', {}, 'error');
 		await interaction.deferReply();
 		const query = interaction.options.getString('query');
 		let tracks = [];
@@ -34,12 +30,9 @@ export default {
 		if (results.loadType === 'SEARCH_RESULT') tracks = results.tracks;
 
 		tracks = tracks.slice(0, 10);
-		if (tracks.length <= 1) {
-			await interaction.replyHandler.locale('CMD.SEARCH.RESPONSE.USE_PLAY_CMD', {}, 'error');
-			return;
-		}
+		if (tracks.length <= 1) return interaction.replyHandler.locale('CMD.SEARCH.RESPONSE.USE_PLAY_CMD', {}, 'error');
 
-		await interaction.replyHandler.reply(tracks.map((track, index) => {
+		return interaction.replyHandler.reply(tracks.map((track, index) => {
 			const duration = msToTime(track.info.length);
 			const durationString = track.info.isStream ? '∞' : msToTimeString(duration, true);
 			return `\`${(index + 1).toString().padStart(tracks.length.toString().length, ' ')}.\` **[${track.info.title}](${track.info.uri})** \`[${durationString}]\``;
@@ -49,7 +42,7 @@ export default {
 					.addComponents(
 						new SelectMenuBuilder()
 							.setCustomId(`play_${interaction.user.id}`)
-							.setPlaceholder(getLocale(await data.guild.get(interaction.guildId, 'settings.locale') ?? defaultLocale, 'CMD.SEARCH.MISC.PICK'))
+							.setPlaceholder(await getGuildLocale(interaction.guildId, 'CMD.SEARCH.MISC.PICK'))
 							.addOptions(tracks.map((track, index) => {
 								let label = `${index + 1}. ${track.info.title}`;
 								if (label.length >= 100) {
@@ -64,7 +57,7 @@ export default {
 					.addComponents(
 						new ButtonBuilder()
 							.setCustomId(`cancel_${interaction.user.id}`)
-							.setLabel(getLocale(await data.guild.get(interaction.guildId, 'settings.locale') ?? defaultLocale, 'MISC.CANCEL'))
+							.setLabel(await getGuildLocale(interaction.guildId, 'MISC.CANCEL'))
 							.setStyle(ButtonStyle.Danger),
 					),
 			],
