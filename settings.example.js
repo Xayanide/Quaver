@@ -1,11 +1,12 @@
+// import 'dotenv/config';
 import { Colors } from 'discord.js';
 
 // The Discord token for your bot. Get it from https://discord.com/developers/applications.
-export const token = 'Paste token here';
+export const token = process.env.BOT_TOKEN || 'Paste token here';
 // The Discord application ID for your bot. Usually the same as your bot's user ID. You can also get this from https://discord.com/developers/applications.
-export const applicationId = 'Paste application ID here';
+export const applicationId = process.env.BOT_APP_ID || 'Paste application ID here';
 // The Discord client secret for your bot. Found in OAuth2 > General at https://discordapp.com/developers/applications.
-export const clientSecret = 'Paste client secret here';
+export const clientSecret = process.env.BOT_CLIENT_SECRET || 'Paste client secret here';
 // A ColorResolvable (https://discord.js.org/#/docs/discord.js/main/typedef/ColorResolvable) color.
 export const colors = {
 	success: Colors.DarkGreen,
@@ -31,18 +32,18 @@ export const database = {
 // Lavalink settings.
 export const lavalink = {
 	// The host IP of the Lavalink instance.
-	host: 'localhost',
+	host: process.env.LAVA_HOST || 'localhost',
 	// The port that Lavalink is listening on. (Defined in application.yml as server.port)
-	port: 12345,
+	port: process.env.LAVA_PORT || 12345,
 	// The password configured for the Lavalink instance. (Defined in application.yml as server.password)
-	password: 'youshallnotpass',
+	password: process.env.LAVA_PASS || 'youshallnotpass',
 	// Whether or not the Lavalink instance is secure. Defaults to false if unspecified.
-	secure: false,
+	secure: process.env.LAVA_SECURE || false,
 	reconnect: {
 		// The delay between reconnect attempts in milliseconds. Defaults to 3000 if unspecified.
-		delay: 3000,
+		delay: process.env.LAVA_RECONNECT_DELAY || 3000,
 		// The number of reconnect attempts before giving up. Defaults to 5 if unspecified.
-		tries: 5,
+		tries: process.env.LAVA_RECONNECT_TRIES || 5,
 	},
 };
 // Configurable features.
@@ -61,9 +62,9 @@ export const features = {
 		// Whether or not the feature is enabled.
 		enabled: true,
 		// Spotify API Client ID, obtainable at https://developer.spotify.com/dashboard/applications.
-		client_id: 'Paste Spotify Client ID here',
+		client_id: process.env.SPOTIFY_CLIENT_ID || 'Paste Spotify Client ID here',
 		// Spotify API Client Secret, obtainable at https://developer.spotify.com/dashboard/applications.
-		client_secret: 'Paste Spotify Client Secret here',
+		client_secret: process.env.SPOTIFY_CLIENT_SECRET || 'Paste Spotify Client Secret here',
 	},
 	// Web feature
 	// Enables Quaver to handle WebSocket connections, used in conjunction with Quaver-Web.
@@ -71,13 +72,13 @@ export const features = {
 		// Whether or not the feature is enabled.
 		enabled: false,
 		// The WebSocket port to use. Has to be the same in Quaver-Web's configuration.
-		port: 3000,
+		port: process.env.WEB_PORT || 3000,
 		// Allowed origins for incoming WebSocket connections.
 		allowedOrigins: [
 			'http://localhost',
 		],
 		// Encryption key for securing access tokens.
-		encryptionKey: 'Type an encryption key here',
+		encryptionKey: process.env.WEB_ENCRYPT_KEY || 'Type an encryption key here',
 		// Key and cert files for HTTPS (remove this property if you do not need HTTPS).
 		https: {
 			key: 'key.pem',

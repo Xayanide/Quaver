@@ -32,11 +32,11 @@ for await (const file of commandFiles) {
 	commands.push(command.default.data.toJSON());
 }
 
-const rest = new REST({ version: '10' }).setToken(process.BOT_TOKEN || token);
+const rest = new REST({ version: '10' }).setToken(token);
 
 try {
 	await rest.put(
-		Routes.applicationCommands(process.env.BOT_CLIENT_ID || applicationId),
+		Routes.applicationCommands(applicationId),
 		{ body: commands },
 	);
 	console.log('Successfully registered application commands.');

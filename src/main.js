@@ -105,8 +105,8 @@ if (httpServer) httpServer.listen(features.web.port);
 if (features.spotify.enabled) {
 	load({
 		client: {
-			id: process.env.SPOTIFY_CLIENT_ID ? process.env.SPOTIFY_CLIENT_ID : features.spotify.client_id,
-			secret: process.env.SPOTIFY_CLIENT_SECRET ? process.env.SPOTIFY_CLIENT_SECRET : features.spotify.client_secret,
+			id: features.spotify.client_id,
+			secret: features.spotify.client_secret,
 		},
 		autoResolveYoutubeTracks: !!process.env.SPOTIFY_AUTO_RESOLVE_YT,
 	});
@@ -127,13 +127,13 @@ bot.commands = new Collection();
 bot.autocomplete = new Collection();
 bot.music = new Node({
 	connection: {
-		host: process.env.LAVA_HOST ? process.env.LAVA_HOST : lavalink.host,
-		port: process.env.LAVA_PORT ? process.env.LAVA_PORT : lavalink.port,
-		password: process.env.LAVA_PASS ? process.env.LAVA_PASS : lavalink.password,
-		secure: process.env.LAVA_SECURE ? !!process.env.LAVA_SECURE : !!lavalink.secure,
+		host: lavalink.host,
+		port: lavalink.port,
+		password: lavalink.password,
+		secure: !!lavalink.secure,
 		reconnect: {
-			delay: process.env.LAVA_RECONNECT_DELAY ? process.env.LAVA_RECONNECT_DELAY ?? 3000 : lavalink.reconnect.delay ?? 3000,
-			tries: process.env.LAVA_RECONNECT_TRIES ? process.env.LAVA_RECONNECT_TRIES ?? 5 : lavalink.reconnect.tries ?? 5,
+			delay: lavalink.reconnect.delay ?? 3000,
+			tries: lavalink.reconnect.tries ?? 5,
 		},
 	},
 	sendGatewayPayload: (id, payload) => bot.guilds.cache.get(id)?.shard?.send(payload),
@@ -274,7 +274,7 @@ for await (const file of musicEventFiles) {
 
 if (features.web.enabled) setInterval(() => bot.emit('timer'), 500);
 
-bot.login(process.env.BOT_TOKEN ? process.env.BOT_TOKEN : token);
+bot.login(token);
 
 ['exit', 'SIGINT', 'SIGUSR1', 'SIGUSR2', 'SIGTERM', 'uncaughtException', 'unhandledRejection'].forEach(eventType => {
 	process.on(eventType, async err => shuttingDown(eventType, err));
