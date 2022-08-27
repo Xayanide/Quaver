@@ -38,7 +38,7 @@ export const lavalink = {
 	// The password configured for the Lavalink instance. (Defined in application.yml as server.password)
 	password: process.env.LAVA_PASS || 'youshallnotpass',
 	// Whether or not the Lavalink instance is secure. Defaults to false if unspecified.
-	secure: process.env.LAVA_SECURE || false,
+	secure: !!process.env.LAVA_SECURE || false,
 	reconnect: {
 		// The delay between reconnect attempts in milliseconds. Defaults to 3000 if unspecified.
 		delay: process.env.LAVA_RECONNECT_DELAY || 3000,
