@@ -1,4 +1,7 @@
-run = ["npm", "run", "start"]
+[interpreter]
+command = "npm run start"
+
+// run = ""
 
 hidden=["database.sqlite", ".config"]
 
