@@ -1,25 +1,9 @@
-hidden=["database.sqlite", ".config"]
-run = "npm run start"
+run = ["npm", "run", "start"]
 
-[[hints]]
-regex = "Error \\[ERR_REQUIRE_ESM\\]"
-message = "We see that you are using require(...) inside your code. We currently do not support this syntax. Please use 'import' instead when using external modules. (https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import)"
+hidden=["database.sqlite", ".config"]
 
 [nix]
 channel = "stable-22_05"
-
-[env]
-XDG_CONFIG_HOME = "/home/runner/.config"
-PATH = "/home/runner/$REPL_SLUG/.config/npm/node_global/bin:/home/runner/$REPL_SLUG/node_modules/.bin"
-npm_config_prefix = "/home/runner/$REPL_SLUG/.config/npm/node_global"
-
-[packager]
-language = "nodejs"
-
-  [packager.features]
-  packageSearch = true
-  guessImports = true
-  enabledForHosting = false
 
 [languages.javascript]
 pattern = "**/{*.js,*.jsx,*.ts,*.tsx}"
