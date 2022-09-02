@@ -113,7 +113,7 @@ data.guild.instance.on('error', async err => {
 	await shuttingDown('keyv', err);
 });
 
-/** @type {Client & {commands: Collection, buttons: Collection, selects: Collection, music: Node}} */
+/** @type {Client & {commands: Collection, autocomplete: Collection, buttons: Collection, selects: Collection, modals: Collection music: Node}} */
 export const bot = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildPresences, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildVoiceStates] });
 bot.commands = new Collection();
 bot.autocomplete = new Collection();
