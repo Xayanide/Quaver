@@ -261,7 +261,7 @@ for await (const file of musicEventFiles) {
 	}
 }
 
-for await (const [guildId, guildData] of data.guild.instance.iterator()) data.guild.localCache.set(guildId, guildData);
+for await (const [guildId, guildData] of data.guild.instance.iterator()) data.guild.localGuilds.set(guildId, guildData);
 
 if (features.web.enabled) setInterval(() => bot.emit('timer'), 500);
 
