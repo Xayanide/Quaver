@@ -184,10 +184,10 @@ export async function shuttingDown(eventType, err) {
 	}
 	finally {
 		if (!['exit', 'SIGINT', 'SIGTERM'].includes(eventType)) {
-			logger.error({ message: `${err.message}\n${err.stack}`, label: 'Quaver' });
+			logger.error({ message: `${err?.message}\n${err?.stack}`, label: 'Quaver' });
 			logger.info({ message: 'Logging additional output to error.log.', label: 'Quaver' });
 			try {
-				await writeFile('error.log', `${eventType}${err.message ? `\n${err.message}` : ''}${err.stack ? `\n${err.stack}` : ''}`);
+				await writeFile('error.log', `${eventType}${err?.message ? `\n${err?.message}` : ''}${err?.stack ? `\n${err?.stack}` : ''}`);
 			}
 			catch (e) {
 				logger.error({ message: 'Encountered error while writing to error.log.', label: 'Quaver' });
