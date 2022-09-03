@@ -17,8 +17,8 @@ export default {
 		const uptimeString = msToTimeString(uptime);
 		return interaction.replyHandler.reply(
 			new EmbedBuilder()
-				.setDescription(getGuildLocale(interaction.guildId, 'CMD.PING.RESPONSE.SUCCESS', interaction.guild ? ` ${interaction.guild.shard.ping}ms` : ''))
-				.setFooter({ text: `${getGuildLocale(interaction.guildId, 'CMD.PING.MISC.UPTIME')} ${uptimeString}` }),
+				.setDescription(await getGuildLocale(interaction.guildId, 'CMD.PING.RESPONSE.SUCCESS', interaction.guild ? ` ${interaction.guild.shard.ping}ms` : ''))
+				.setFooter({ text: `${await getGuildLocale(interaction.guildId, 'CMD.PING.MISC.UPTIME')} ${uptimeString}` }),
 			{ ephemeral: true },
 		);
 	},

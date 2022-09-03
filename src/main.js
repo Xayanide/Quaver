@@ -8,7 +8,7 @@ import { writeFile } from 'fs/promises';
 import { createInterface } from 'readline';
 import { features, lavalink, token } from '#settings';
 import { msToTime, msToTimeString, getGuildLocale, getAbsoluteFileURL } from '#lib/util/util.js';
-import { logger, data, setLocales, cachedDatabase } from '#lib/util/common.js';
+import { logger, data, setLocales } from '#lib/util/common.js';
 import { createServer } from 'https';
 
 export const startup = { started: false };
@@ -50,8 +50,7 @@ rl.on('line', async input => {
 				console.log('Guild not found.');
 				break;
 			}
-			const cdb = cachedDatabase.get(guildId);
-			if (!cdb.settings.features.stay.whitelisted) {
+			if (!await data.guild.get(guildId, 'features.stay.whitelisted')) {
 				await data.guild.set(guildId, 'features.stay.whitelisted', true);
 				console.log(`Added ${guild.name} to the 24/7 whitelist.`);
 			}
@@ -153,18 +152,18 @@ export async function shuttingDown(eventType, err) {
 				logger.info({ message: `[G ${player.guildId}] Disconnecting (restarting)`, label: 'Quaver' });
 				const fileBuffer = [];
 				if (player.queue.current && (player.playing || player.paused)) {
-					fileBuffer.push(`${getGuildLocale(player.guildId, 'MISC.CURRENT')}:`);
+					fileBuffer.push(`${await getGuildLocale(player.guildId, 'MISC.CURRENT')}:`);
 					fileBuffer.push(player.queue.current.uri);
 				}
 				if (player.queue.tracks.length > 0) {
-					fileBuffer.push(`${getGuildLocale(player.guildId, 'MISC.QUEUE')}:`);
+					fileBuffer.push(`${await getGuildLocale(player.guildId, 'MISC.QUEUE')}:`);
 					fileBuffer.push(player.queue.tracks.map(track => track.uri).join('\n'));
 				}
 				await player.handler.disconnect();
 				const success = await player.handler.send(
 					new EmbedBuilder()
-						.setDescription(`${getGuildLocale(player.guildId, ['exit', 'SIGINT', 'SIGTERM', 'lavalink'].includes(eventType) ? 'MUSIC.PLAYER.RESTARTING.DEFAULT' : 'MUSIC.PLAYER.RESTARTING.CRASHED')}${fileBuffer.length > 0 ? `\n${getGuildLocale(player.guildId, 'MUSIC.PLAYER.RESTARTING.QUEUE_DATA_ATTACHED')}` : ''}`)
-						.setFooter({ text: getGuildLocale(player.guildId, 'MUSIC.PLAYER.RESTARTING.APOLOGY') }),
+						.setDescription(`${await getGuildLocale(player.guildId, ['exit', 'SIGINT', 'SIGTERM', 'lavalink'].includes(eventType) ? 'MUSIC.PLAYER.RESTARTING.DEFAULT' : 'MUSIC.PLAYER.RESTARTING.CRASHED')}${fileBuffer.length > 0 ? `\n${await getGuildLocale(player.guildId, 'MUSIC.PLAYER.RESTARTING.QUEUE_DATA_ATTACHED')}` : ''}`)
+						.setFooter({ text: await getGuildLocale(player.guildId, 'MUSIC.PLAYER.RESTARTING.APOLOGY') }),
 					{
 						type: 'warning',
 						files: fileBuffer.length > 0 ? [
@@ -212,7 +211,6 @@ for await (const folder of localeFolders) {
 	locales.set(folder, localeData);
 }
 setLocales(locales);
-for await (const [guildId, guildData] of data.guild.instance.iterator()) cachedDatabase.set(guildId, guildData);
 
 const commandFiles = readdirSync(getAbsoluteFileURL(import.meta.url, ['commands'])).filter(file => file.endsWith('.js'));
 for await (const file of commandFiles) {

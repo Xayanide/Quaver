@@ -29,8 +29,8 @@ export default {
 		if (features.web.enabled) io.to(`guild:${interaction.guildId}`).emit('volumeUpdate', volume);
 		return interaction.replyHandler.reply(
 			new EmbedBuilder()
-				.setDescription(getGuildLocale(interaction.guildId, 'CMD.VOLUME.RESPONSE.SUCCESS', volume))
-				.setFooter({ text: getGuildLocale(interaction.guildId, 'MUSIC.PLAYER.FILTER_NOTE') }),
+				.setDescription(await getGuildLocale(interaction.guildId, 'CMD.VOLUME.RESPONSE.SUCCESS', volume))
+				.setFooter({ text: await getGuildLocale(interaction.guildId, 'MUSIC.PLAYER.FILTER_NOTE') }),
 		);
 	},
 };

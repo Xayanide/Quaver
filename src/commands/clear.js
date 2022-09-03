@@ -19,8 +19,8 @@ export default {
 		if (player.queue.tracks.length === 0) return interaction.replyHandler.locale('CMD.CLEAR.RESPONSE.QUEUE_EMPTY', { type: 'error' });
 		const msg = await interaction.replyHandler.reply(
 			new EmbedBuilder()
-				.setDescription(getGuildLocale(interaction.guildId, 'CMD.CLEAR.RESPONSE.CONFIRMATION'))
-				.setFooter({ text: getGuildLocale(interaction.guildId, 'MISC.ACTION_IRREVERSIBLE') }),
+				.setDescription(await getGuildLocale(interaction.guildId, 'CMD.CLEAR.RESPONSE.CONFIRMATION'))
+				.setFooter({ text: await getGuildLocale(interaction.guildId, 'MISC.ACTION_IRREVERSIBLE') }),
 			{
 				type: 'warning',
 				components: [
@@ -29,11 +29,11 @@ export default {
 							new ButtonBuilder()
 								.setCustomId('clear')
 								.setStyle(ButtonStyle.Danger)
-								.setLabel(getGuildLocale(interaction.guildId, 'MISC.CONFIRM')),
+								.setLabel(await getGuildLocale(interaction.guildId, 'MISC.CONFIRM')),
 							new ButtonBuilder()
 								.setCustomId('cancel')
 								.setStyle(ButtonStyle.Secondary)
-								.setLabel(getGuildLocale(interaction.guildId, 'MISC.CANCEL')),
+								.setLabel(await getGuildLocale(interaction.guildId, 'MISC.CANCEL')),
 						),
 				],
 				fetchReply: true,
@@ -43,7 +43,7 @@ export default {
 			await message.edit(
 				messageDataBuilder(
 					new EmbedBuilder()
-						.setDescription(getGuildLocale(message.guildId, 'DISCORD.INTERACTION.EXPIRED')),
+						.setDescription(await getGuildLocale(message.guildId, 'DISCORD.INTERACTION.EXPIRED')),
 					{ components: [] },
 				),
 			);

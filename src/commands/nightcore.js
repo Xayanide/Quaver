@@ -28,8 +28,8 @@ export default {
 		if (features.web.enabled) io.to(`guild:${interaction.guildId}`).emit('filterUpdate', { bassboost: player.bassboost, nightcore: player.nightcore });
 		return interaction.replyHandler.reply(
 			new EmbedBuilder()
-				.setDescription(getGuildLocale(interaction.guildId, player.nightcore ? 'CMD.NIGHTCORE.RESPONSE.ENABLED' : 'CMD.NIGHTCORE.RESPONSE.DISABLED'))
-				.setFooter({ text: getGuildLocale(interaction.guildId, 'MUSIC.PLAYER.FILTER_NOTE') }),
+				.setDescription(await getGuildLocale(interaction.guildId, player.nightcore ? 'CMD.NIGHTCORE.RESPONSE.ENABLED' : 'CMD.NIGHTCORE.RESPONSE.DISABLED'))
+				.setFooter({ text: await getGuildLocale(interaction.guildId, 'MUSIC.PLAYER.FILTER_NOTE') }),
 		);
 	},
 };

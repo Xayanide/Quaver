@@ -2,7 +2,7 @@ import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import { defaultLocale, features } from '#settings';
 import { checks } from '#lib/util/constants.js';
 import { getGuildLocale, getLocale } from '#lib/util/util.js';
-import { cachedDatabase, data } from '#lib/util/common.js';
+import { data } from '#lib/util/common.js';
 
 export default {
 	data: new SlashCommandBuilder()
@@ -21,13 +21,11 @@ export default {
 	async execute(interaction) {
 		const { io } = await import('#src/main.js');
 		if (!features.stay.enabled) return interaction.replyHandler.locale('FEATURE.DISABLED.DEFAULT', { type: 'error' });
-		const cdb = cachedDatabase.get(interaction.guildId);
-
-		if (features.stay.whitelist && !cdb.settings.features.stay.whitelist) return interaction.replyHandler.locale('CMD.247.RESPONSE.FEATURE_NOT_WHITELISTED', { type: 'error' });
+		if (features.stay.whitelist && !await data.guild.get(interaction.guildId, 'features.stay.whitelisted')) return interaction.replyHandler.locale('CMD.247.RESPONSE.FEATURE_NOT_WHITELISTED', { type: 'error' });
 		const player = interaction.client.music.players.get(interaction.guildId);
 		if (!player?.queue?.channel?.id) return interaction.replyHandler.locale('CMD.247.RESPONSE.QUEUE_CHANNEL_MISSING', { type: 'error' });
 		const enabled = interaction.options.getBoolean('enabled');
-		const always = enabled !== null ? enabled : !cdb.settings.stay.enabled;
+		const always = enabled !== null ? enabled : !await data.guild.get(interaction.guildId, 'settings.stay.enabled');
 		await data.guild.set(interaction.guildId, 'settings.stay.enabled', always);
 		if (always) {
 			await data.guild.set(interaction.guildId, 'settings.stay.channel', player.channelId);
@@ -42,8 +40,8 @@ export default {
 		// and pause timeout is only set when everyone leaves
 		await interaction.replyHandler.reply(
 			new EmbedBuilder()
-				.setDescription(getGuildLocale(interaction.guildId, always ? 'CMD.247.RESPONSE.ENABLED' : 'CMD.247.RESPONSE.DISABLED'))
-				.setFooter({ text: always ? getGuildLocale(interaction.guildId, 'CMD.247.MISC.NOTE') : null }),
+				.setDescription(await getGuildLocale(interaction.guildId, always ? 'CMD.247.RESPONSE.ENABLED' : 'CMD.247.RESPONSE.DISABLED'))
+				.setFooter({ text: always ? await getGuildLocale(interaction.guildId, 'CMD.247.MISC.NOTE') : null }),
 		);
 		if (!always && !player.playing) player.queue.emit('finish');
 	},

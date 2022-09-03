@@ -1,6 +1,6 @@
 import { ActionRowBuilder, EmbedBuilder } from 'discord.js';
-import { getGuildLocale, messageDataBuilder, settingsPage } from '#lib/util/util.js';
-import { cachedDatabase, confirmationTimeout, data } from '#lib/util/common.js';
+import { getGuildLocale, getLocale, messageDataBuilder, settingsPage } from '#lib/util/util.js';
+import { confirmationTimeout, data } from '#lib/util/common.js';
 import { defaultLocale } from '#settings';
 
 export default {
@@ -13,7 +13,7 @@ export default {
 			await message.edit(
 				messageDataBuilder(
 					new EmbedBuilder()
-						.setDescription(getGuildLocale(message.guildId, 'DISCORD.INTERACTION.EXPIRED')),
+						.setDescription(await getGuildLocale(message.guildId, 'DISCORD.INTERACTION.EXPIRED')),
 					{ components: [] },
 				),
 			);
@@ -21,10 +21,9 @@ export default {
 		}, 30 * 1000, interaction.message);
 		const option = interaction.customId.split('_')[1];
 		await data.guild.set(interaction.guildId, 'settings.format', option);
-		const cdb = cachedDatabase.get(interaction.guildId);
-		const guildLocale = cdb.settings.locale ?? defaultLocale;
+		const guildLocale = await data.guild.get(interaction.guildId, 'settings.locale') ?? defaultLocale;
 		const { current, embeds, actionRow } = await settingsPage(interaction, guildLocale, 'format');
-		const description = `${getGuildLocale(interaction.guildId, 'CMD.SETTINGS.RESPONSE.HEADER', interaction.guild.name)}\n\n**${getGuildLocale(interaction.guildId, 'CMD.SETTINGS.MISC.FORMAT.NAME')}** ─ ${getGuildLocale(interaction.guildId, 'CMD.SETTINGS.MISC.FORMAT.DESCRIPTION')}\n> ${getGuildLocale(interaction.guildId, 'MISC.CURRENT')}: \`${current}\``;
+		const description = `${getLocale(guildLocale, 'CMD.SETTINGS.RESPONSE.HEADER', interaction.guild.name)}\n\n**${getLocale(guildLocale, 'CMD.SETTINGS.MISC.FORMAT.NAME')}** ─ ${getLocale(guildLocale, 'CMD.SETTINGS.MISC.FORMAT.DESCRIPTION')}\n> ${getLocale(guildLocale, 'MISC.CURRENT')}: \`${current}\``;
 		return interaction.replyHandler.reply(
 			[description, ...embeds],
 			{

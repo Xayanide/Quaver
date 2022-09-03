@@ -1,5 +1,5 @@
 import { features } from '#settings';
-import { logger, cachedDatabase } from '#lib/util/common.js';
+import { logger, data } from '#lib/util/common.js';
 import { getGuildLocale } from '#lib/util/util.js';
 
 export default {
@@ -8,8 +8,7 @@ export default {
 	/** @param {import('@lavaclient/queue').Queue & {player: import('lavaclient').Player & {handler: import('#lib/PlayerHandler.js').default}}} queue */
 	async execute(queue) {
 		const { io } = await import('#src/main.js');
-		const cdb = cachedDatabase.get(queue.player.guildId);
-		if (cdb.settings.stay.enabled) return queue.player.handler.locale('MUSIC.QUEUE.EMPTY');
+		if (await data.guild.get(queue.player.guildId, 'settings.stay.enabled')) return queue.player.handler.locale('MUSIC.QUEUE.EMPTY');
 		// rare case where the bot sets timeout after setting pause timeout
 		if (queue.player.pauseTimeout) return;
 		logger.info({ message: `[G ${queue.player.guildId}] Setting timeout`, label: 'Quaver' });
@@ -21,6 +20,6 @@ export default {
 		}, 30 * 60 * 1000, queue.player);
 		queue.player.timeoutEnd = Date.now() + (30 * 60 * 1000);
 		if (features.web.enabled) io.to(`guild:${queue.player.guildId}`).emit('timeoutUpdate', queue.player.timeoutEnd);
-		return queue.player.handler.send(`${getGuildLocale(queue.player.guildId, 'MUSIC.QUEUE.EMPTY')} ${getGuildLocale(queue.player.guildId, 'MUSIC.DISCONNECT.INACTIVITY.WARNING', Math.floor(Date.now() / 1000) + (30 * 60))}`, { type: 'warning' });
+		return queue.player.handler.send(`${await getGuildLocale(queue.player.guildId, 'MUSIC.QUEUE.EMPTY')} ${await getGuildLocale(queue.player.guildId, 'MUSIC.DISCONNECT.INACTIVITY.WARNING', Math.floor(Date.now() / 1000) + (30 * 60))}`, { type: 'warning' });
 	},
 };
