@@ -109,8 +109,8 @@ export default {
 		const started = player.playing || player.paused;
 		await interaction.replyHandler.reply(
 			new EmbedBuilder()
-				.setDescription(await getGuildLocale(interaction.guildId, msg, ...extras))
-				.setFooter({ text: started ? `${await getGuildLocale(interaction.guildId, 'MISC.POSITION')}: ${firstPosition}${endPosition !== firstPosition ? ` - ${endPosition}` : ''}` : null }),
+				.setDescription(getGuildLocale(interaction.guildId, msg, ...extras))
+				.setFooter({ text: started ? `${getGuildLocale(interaction.guildId, 'MISC.POSITION')}: ${firstPosition}${endPosition !== firstPosition ? ` - ${endPosition}` : ''}` : null }),
 			{ type: 'success', ephemeral: true },
 		);
 		if (!started) await player.queue.start();

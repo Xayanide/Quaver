@@ -2,7 +2,7 @@ import { SlashCommandBuilder, ChannelType, PermissionsBitField } from 'discord.j
 import { defaultLocale, features } from '#settings';
 import { checks } from '#lib/util/constants.js';
 import { getLocale } from '#lib/util/util.js';
-import { data } from '#lib/util/common.js';
+import { cachedDatabase, data } from '#lib/util/common.js';
 
 export default {
 	data: new SlashCommandBuilder()
@@ -27,7 +27,8 @@ export default {
 		if (!channel.permissionsFor(interaction.client.user.id).has(new PermissionsBitField([PermissionsBitField.Flags.ViewChannel, PermissionsBitField.Flags.SendMessages]))) return interaction.replyHandler.locale('CMD.BIND.RESPONSE.PERMISSIONS_INSUFFICIENT', { args: [channel.id], type: 'error' });
 		player.queue.channel = channel;
 		if (features.web.enabled) io.to(`guild:${interaction.guildId}`).emit('textChannelUpdate', channel.name);
-		if (await data.guild.get(interaction.guildId, 'settings.stay.enabled')) await data.guild.set(interaction.guildId, 'settings.stay.text', channel.id);
+		const cdb = cachedDatabase.get(interaction.guildId);
+		if (cdb.settings.stay.enabled) await data.guild.set(interaction.guildId, 'settings.stay.text', channel.id);
 		return interaction.replyHandler.locale('CMD.BIND.RESPONSE.SUCCESS', { args: [channel.id], type: 'success' });
 	},
 };

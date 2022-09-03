@@ -14,7 +14,7 @@ export default {
 			await message.edit(
 				messageDataBuilder(
 					new EmbedBuilder()
-						.setDescription(await getGuildLocale(message.guildId, 'DISCORD.INTERACTION.EXPIRED')),
+						.setDescription(getGuildLocale(message.guildId, 'DISCORD.INTERACTION.EXPIRED')),
 					{ components: [] },
 				),
 			);

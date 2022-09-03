@@ -26,7 +26,7 @@ export default {
 						return `\`${index + 1}.\` **[${escapeMarkdown(track.title)}](${track.uri})** \`[${durationString}]\` <@${track.requester}>`;
 					}).join('\n'),
 				)
-				.setFooter({ text: await getGuildLocale(interaction.guildId, 'MISC.PAGE', '1', pages.length) }),
+				.setFooter({ text: getGuildLocale(interaction.guildId, 'MISC.PAGE', '1', pages.length) }),
 			{
 				components: [
 					new ActionRowBuilder()
@@ -39,7 +39,7 @@ export default {
 							new ButtonBuilder()
 								.setCustomId('queue_goto')
 								.setStyle(ButtonStyle.Secondary)
-								.setLabel(await getGuildLocale(interaction.guildId, 'MISC.GO_TO')),
+								.setLabel(getGuildLocale(interaction.guildId, 'MISC.GO_TO')),
 							new ButtonBuilder()
 								.setCustomId('queue_2')
 								.setEmoji('➡️')

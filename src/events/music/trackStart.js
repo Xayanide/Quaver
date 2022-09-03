@@ -1,5 +1,5 @@
 import { features } from '#settings';
-import { data, logger } from '#lib/util/common.js';
+import { cachedDatabase, logger } from '#lib/util/common.js';
 import { getGuildLocale, msToTime, msToTimeString } from '#lib/util/util.js';
 import { EmbedBuilder, escapeMarkdown } from 'discord.js';
 
@@ -29,17 +29,19 @@ export default {
 				return t;
 			}));
 		}
-		const format = await data.guild.get(queue.player.guildId, 'settings.format') ?? 'simple';
+		const cdb = cachedDatabase.get(queue.player.guildId);
+
+		const format = cdb.settings.format ?? 'simple';
 		return format === 'simple'
-			? queue.player.handler.send(`${await getGuildLocale(queue.player.guildId, 'MUSIC.PLAYER.PLAYING.NOW.SIMPLE', escapeMarkdown(track.title), track.uri, durationString)}\n${await getGuildLocale(queue.player.guildId, 'MISC.ADDED_BY', track.requester)}`)
+			? queue.player.handler.send(`${getGuildLocale(queue.player.guildId, 'MUSIC.PLAYER.PLAYING.NOW.SIMPLE', escapeMarkdown(track.title), track.uri, durationString)}\n${getGuildLocale(queue.player.guildId, 'MISC.ADDED_BY', track.requester)}`)
 			: queue.player.handler.send(
 				new EmbedBuilder()
-					.setTitle(await getGuildLocale(queue.player.guildId, 'MUSIC.PLAYER.PLAYING.NOW.DETAILED.TITLE'))
+					.setTitle(getGuildLocale(queue.player.guildId, 'MUSIC.PLAYER.PLAYING.NOW.DETAILED.TITLE'))
 					.setDescription(`**[${escapeMarkdown(track.title)}](${track.uri})**`)
 					.addFields([
-						{ name: await getGuildLocale(queue.player.guildId, 'MUSIC.PLAYER.PLAYING.NOW.DETAILED.DURATION'), value: `\`${durationString}\``, inline: true },
-						{ name: await getGuildLocale(queue.player.guildId, 'MUSIC.PLAYER.PLAYING.NOW.DETAILED.UPLOADER'), value: track.author, inline: true },
-						{ name: await getGuildLocale(queue.player.guildId, 'MUSIC.PLAYER.PLAYING.NOW.DETAILED.ADDED_BY'), value: `<@${track.requester}>`, inline: true },
+						{ name: getGuildLocale(queue.player.guildId, 'MUSIC.PLAYER.PLAYING.NOW.DETAILED.DURATION'), value: `\`${durationString}\``, inline: true },
+						{ name: getGuildLocale(queue.player.guildId, 'MUSIC.PLAYER.PLAYING.NOW.DETAILED.UPLOADER'), value: track.author, inline: true },
+						{ name: getGuildLocale(queue.player.guildId, 'MUSIC.PLAYER.PLAYING.NOW.DETAILED.ADDED_BY'), value: `<@${track.requester}>`, inline: true },
 					])
 					.setThumbnail(`https://i.ytimg.com/vi/${track.identifier}/hqdefault.jpg`),
 			);

@@ -39,7 +39,7 @@ export default {
 			}
 			else {
 				msg = 'MUSIC.QUEUE.TRACK_ADDED.MULTIPLE.DEFAULT';
-				extras = [resolvedTracks.length, await getGuildLocale(interaction.guildId, 'MISC.YOUR_SEARCH'), ''] ;
+				extras = [resolvedTracks.length, getGuildLocale(interaction.guildId, 'MISC.YOUR_SEARCH'), ''] ;
 			}
 			if (!player?.connected) {
 				player = interaction.client.music.createPlayer(interaction.guildId);
@@ -63,8 +63,8 @@ export default {
 			const started = player.playing || player.paused;
 			await interaction.replyHandler.reply(
 				new EmbedBuilder()
-					.setDescription(await getGuildLocale(interaction.guildId, msg, ...extras))
-					.setFooter({ text: started ? `${await getGuildLocale(interaction.guildId, 'MISC.POSITION')}: ${firstPosition}${endPosition !== firstPosition ? ` - ${endPosition}` : ''}` : null }),
+					.setDescription(getGuildLocale(interaction.guildId, msg, ...extras))
+					.setFooter({ text: started ? `${getGuildLocale(interaction.guildId, 'MISC.POSITION')}: ${firstPosition}${endPosition !== firstPosition ? ` - ${endPosition}` : ''}` : null }),
 				{ type: 'success', components: [] },
 			);
 			if (!started) await player.queue.start();
@@ -83,7 +83,7 @@ export default {
 			await message.edit(
 				messageDataBuilder(
 					new EmbedBuilder()
-						.setDescription(await getGuildLocale(message.guildId, 'DISCORD.INTERACTION.EXPIRED')),
+						.setDescription(getGuildLocale(message.guildId, 'DISCORD.INTERACTION.EXPIRED')),
 					{ components: [] },
 				),
 			);
@@ -101,7 +101,7 @@ export default {
 				const durationString = track.info.isStream ? '∞' : msToTimeString(duration, true);
 				return `\`${(firstIndex + index).toString().padStart(largestIndexSize, ' ')}.\` **[${escapeMarkdown(track.info.title)}](${track.info.uri})** \`[${durationString}]\``;
 			}).join('\n'))
-			.setFooter({ text: await getGuildLocale(interaction.guildId, 'MISC.PAGE', page, pages.length) });
+			.setFooter({ text: getGuildLocale(interaction.guildId, 'MISC.PAGE', page, pages.length) });
 		original.components[0] = ActionRowBuilder.from(original.components[0]);
 		original.components[0].components[0] = SelectMenuBuilder.from(original.components[0].components[0])
 			.setOptions(

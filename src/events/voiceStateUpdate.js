@@ -1,5 +1,5 @@
 import { PermissionsBitField, ChannelType, StageInstancePrivacyLevel, EmbedBuilder } from 'discord.js';
-import { logger, data } from '#lib/util/common.js';
+import { logger, data, cachedDatabase } from '#lib/util/common.js';
 import { getGuildLocale } from '#lib/util/util.js';
 import { features } from '#settings';
 
@@ -16,6 +16,8 @@ export default {
 		/** @type {import('lavaclient').Player & {handler: import('#lib/PlayerHandler.js').default}} */
 		const player = oldState.client.music.players.get(guild.id);
 		if (!player) return;
+		const cdb = cachedDatabase.get(guild.id);
+
 		// Quaver voiceStateUpdate
 		if (oldState.member.user.id === oldState.client.user.id) {
 			// Quaver didn't leave the channel, but their voice state changed
@@ -25,7 +27,7 @@ export default {
 			if (!newState.channelId) {
 				logger.info({ message: `[G ${player.guildId}] Cleaning up`, label: 'Quaver' });
 				player.channelId = null;
-				if (await data.guild.get(player.guildId, 'settings.stay.enabled')) {
+				if (cdb.settings.stay.enabled) {
 					await data.guild.set(player.guildId, 'settings.stay.enabled', false);
 				}
 				await player.handler.locale('MUSIC.SESSION_ENDED.FORCED.DISCONNECTED', { type: 'warning' });
@@ -44,7 +46,7 @@ export default {
 					await player.handler.locale('DISCORD.INSUFFICIENT_PERMISSIONS.BOT.BASIC', { type: 'error' });
 					return player.handler.disconnect();
 				}
-				if (await data.guild.get(player.guildId, 'settings.stay.enabled') && await data.guild.get(player.guildId, 'settings.stay.channel') !== newState.channelId) await data.guild.set(player.guildId, 'settings.stay.channel', newState.channelId);
+				if (cdb.settings.stay.enabled && cdb.settings.stay.channel !== newState.channelId) await data.guild.set(player.guildId, 'settings.stay.channel', newState.channelId);
 			}
 			// Channel is a stage channel, and Quaver is suppressed
 			// This also handles suppressing Quaver mid-track
@@ -56,28 +58,28 @@ export default {
 					return player.handler.disconnect();
 				}
 				if (!permissions.has(PermissionsBitField.StageModerator)) {
-					if (await data.guild.get(player.guildId, 'settings.stay.enabled')) await data.guild.set(player.guildId, 'settings.stay.enabled', false);
+					if (cdb.settings.stay.enabled) await data.guild.set(player.guildId, 'settings.stay.enabled', false);
 					await player.handler.locale('MUSIC.SESSION_ENDED.FORCED.STAGE_NOT_MODERATOR', { type: 'warning' });
 					return player.handler.disconnect();
 				}
 				await newState.setSuppressed(false);
 				if (!newState.channel.stageInstance) {
 					try {
-						await newState.channel.createStageInstance({ topic: await getGuildLocale(player.guildId, 'MISC.STAGE_TOPIC'), privacyLevel: StageInstancePrivacyLevel.GuildOnly });
+						await newState.channel.createStageInstance({ topic: getGuildLocale(player.guildId, 'MISC.STAGE_TOPIC'), privacyLevel: StageInstancePrivacyLevel.GuildOnly });
 					}
 					catch (err) {
 						logger.error({ message: `${err.message}\n${err.stack}`, label: 'Quaver' });
 					}
 				}
-				if (await data.guild.get(player.guildId, 'settings.stay.enabled') && await data.guild.get(player.guildId, 'settings.stay.channel') !== newState.channelId) await data.guild.set(player.guildId, 'settings.stay.channel', newState.channelId);
+				if (cdb.settings.stay.enabled && cdb.settings.stay.channel !== newState.channelId) await data.guild.set(player.guildId, 'settings.stay.channel', newState.channelId);
 			}
 			// Moved to a new channel that has no humans and 24/7 is disabled
-			if (newState.channel.members.filter(m => !m.user.bot).size < 1 && !await data.guild.get(player.guildId, 'settings.stay.enabled')) {
+			if (newState.channel.members.filter(m => !m.user.bot).size < 1 && !cdb.settings.stay.enabled) {
 				// Avoid pauseTimeout if 24/7 is enabled
-				if (await data.guild.get(player.guildId, 'settings.stay.enabled')) return;
+				if (cdb.settings.stay.enabled) return;
 				// Nothing is playing so we'll leave
 				if (!player.queue.current || !player.playing && !player.paused) {
-					if (await data.guild.get(player.guildId, 'settings.stay.enabled')) await data.guild.set(player.guildId, 'settings.stay.enabled', false);
+					if (cdb.settings.stay.enabled) await data.guild.set(player.guildId, 'settings.stay.enabled', false);
 					logger.info({ message: `[G ${player.guildId}] Disconnecting (alone)`, label: 'Quaver' });
 					await player.handler.locale('MUSIC.DISCONNECT.ALONE.DISCONNECTED.MOVED', { type: 'warning' });
 					return player.handler.disconnect();
@@ -100,8 +102,8 @@ export default {
 				if (features.web.enabled) io.to(`guild:${player.guildId}`).emit('pauseTimeoutUpdate', player.timeoutEnd);
 				return player.handler.send(
 					new EmbedBuilder()
-						.setDescription(`${await getGuildLocale(player.guildId, 'MUSIC.DISCONNECT.ALONE.WARNING')} ${await getGuildLocale(player.guildId, 'MUSIC.DISCONNECT.INACTIVITY.WARNING', Math.floor(Date.now() / 1000) + (5 * 60))}`)
-						.setFooter({ text: await getGuildLocale(player.guildId, 'MUSIC.DISCONNECT.ALONE.REJOIN_TO_RESUME') }),
+						.setDescription(`${getGuildLocale(player.guildId, 'MUSIC.DISCONNECT.ALONE.WARNING')} ${getGuildLocale(player.guildId, 'MUSIC.DISCONNECT.INACTIVITY.WARNING', Math.floor(Date.now() / 1000) + (5 * 60))}`)
+						.setFooter({ text: getGuildLocale(player.guildId, 'MUSIC.DISCONNECT.ALONE.REJOIN_TO_RESUME') }),
 					{ type: 'warning' },
 				);
 			}
@@ -140,7 +142,7 @@ export default {
 		if (newState.channelId === oldState.channelId) return;
 		/** Checks for when a user leaves */
 		// Avoid pauseTimeout if 24/7 is enabled
-		if (await data.guild.get(guild.id, 'settings.stay.enabled')) return;
+		if (cdb.settings.stay.enabled) return;
 		// Channel still has humans
 		if (oldState.channel.members.filter(m => !m.user.bot).size >= 1) return;
 		// Nothing is playing so we'll leave
@@ -169,8 +171,8 @@ export default {
 		if (features.web.enabled) io.to(`guild:${player.guildId}`).emit('pauseTimeoutUpdate', player.timeoutEnd);
 		return player.handler.send(
 			new EmbedBuilder()
-				.setDescription(`${await getGuildLocale(player.guildId, 'MUSIC.DISCONNECT.ALONE.WARNING')} ${await getGuildLocale(player.guildId, 'MUSIC.DISCONNECT.INACTIVITY.WARNING', Math.floor(Date.now() / 1000) + (5 * 60))}`)
-				.setFooter({ text: await getGuildLocale(player.guildId, 'MUSIC.DISCONNECT.ALONE.REJOIN_TO_RESUME') }),
+				.setDescription(`${getGuildLocale(player.guildId, 'MUSIC.DISCONNECT.ALONE.WARNING')} ${getGuildLocale(player.guildId, 'MUSIC.DISCONNECT.INACTIVITY.WARNING', Math.floor(Date.now() / 1000) + (5 * 60))}`)
+				.setFooter({ text: getGuildLocale(player.guildId, 'MUSIC.DISCONNECT.ALONE.REJOIN_TO_RESUME') }),
 			{ type: 'warning' },
 		);
 	},

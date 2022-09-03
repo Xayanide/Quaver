@@ -1,4 +1,4 @@
-import { logger, data } from '#lib/util/common.js';
+import { logger, cachedDatabase } from '#lib/util/common.js';
 import { escapeMarkdown } from 'discord.js';
 
 export default {
@@ -23,7 +23,9 @@ export default {
 			}
 		}
 		if (queue.player.failed) delete queue.player.failed;
-		if (bot.guilds.cache.get(queue.player.guildId).channels.cache.get(queue.player.channelId).members?.filter(m => !m.user.bot).size < 1 && !await data.guild.get(queue.player.guildId, 'settings.stay.enabled')) {
+		const cdb = cachedDatabase.get(queue.player.guildId);
+
+		if (bot.guilds.cache.get(queue.player.guildId).channels.cache.get(queue.player.channelId).members?.filter(m => !m.user.bot).size < 1 && !cdb.settings.stay.enabled) {
 			logger.info({ message: `[G ${queue.player.guildId}] Disconnecting (alone)`, label: 'Quaver' });
 			await queue.player.handler.locale('MUSIC.DISCONNECT.ALONE.DISCONNECTED.DEFAULT', { type: 'warning' });
 			return queue.player.handler.disconnect();

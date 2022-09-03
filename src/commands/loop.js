@@ -32,15 +32,15 @@ export default {
 		switch (type) {
 			case 'disabled':
 				loop = LoopType.None;
-				typeLocale = await getGuildLocale(interaction.guildId, 'CMD.LOOP.OPTION.TYPE.OPTION.DISABLED');
+				typeLocale = getGuildLocale(interaction.guildId, 'CMD.LOOP.OPTION.TYPE.OPTION.DISABLED');
 				break;
 			case 'track':
 				loop = LoopType.Song;
-				typeLocale = await getGuildLocale(interaction.guildId, 'CMD.LOOP.OPTION.TYPE.OPTION.TRACK');
+				typeLocale = getGuildLocale(interaction.guildId, 'CMD.LOOP.OPTION.TYPE.OPTION.TRACK');
 				break;
 			case 'queue':
 				loop = LoopType.Queue;
-				typeLocale = await getGuildLocale(interaction.guildId, 'CMD.LOOP.OPTION.TYPE.OPTION.QUEUE');
+				typeLocale = getGuildLocale(interaction.guildId, 'CMD.LOOP.OPTION.TYPE.OPTION.QUEUE');
 				break;
 		}
 		typeLocale = typeLocale.toLowerCase();

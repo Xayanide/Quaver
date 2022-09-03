@@ -27,7 +27,7 @@ export default {
 		if (skip.users.length >= skip.required) {
 			const track = await player.queue.skip();
 			await player.queue.start();
-			await interaction.replyHandler.reply(`${await getGuildLocale(interaction.guildId, 'CMD.SKIP.RESPONSE.SUCCESS.VOTED', escapeMarkdown(track.title), track.uri)}\n${await getGuildLocale(interaction.guildId, 'MISC.ADDED_BY', track.requester)}`);
+			await interaction.replyHandler.reply(`${getGuildLocale(interaction.guildId, 'CMD.SKIP.RESPONSE.SUCCESS.VOTED', escapeMarkdown(track.title), track.uri)}\n${getGuildLocale(interaction.guildId, 'MISC.ADDED_BY', track.requester)}`);
 			return player.queue.next();
 		}
 		player.skip = skip;

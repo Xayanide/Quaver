@@ -1,6 +1,6 @@
 import { ActionRowBuilder, EmbedBuilder, SelectMenuBuilder } from 'discord.js';
-import { checkLocaleCompletion, getGuildLocale, getLocale, messageDataBuilder, roundTo, settingsPage } from '#lib/util/util.js';
-import { confirmationTimeout, data } from '#lib/util/common.js';
+import { checkLocaleCompletion, getGuildLocale, messageDataBuilder, roundTo, settingsPage } from '#lib/util/util.js';
+import { cachedDatabase, confirmationTimeout, data } from '#lib/util/common.js';
 import { defaultLocale } from '#settings';
 import { settingsOptions } from '#lib/util/constants.js';
 
@@ -14,7 +14,7 @@ export default {
 			await message.edit(
 				messageDataBuilder(
 					new EmbedBuilder()
-						.setDescription(await getGuildLocale(message.guildId, 'DISCORD.INTERACTION.EXPIRED')),
+						.setDescription(getGuildLocale(message.guildId, 'DISCORD.INTERACTION.EXPIRED')),
 					{ components: [] },
 				),
 			);
@@ -31,9 +31,10 @@ export default {
 				{ type: 'warning', ephemeral: true },
 			);
 		}
-		const guildLocale = await data.guild.get(interaction.guildId, 'settings.locale') ?? defaultLocale;
+		const cdb = cachedDatabase.get(interaction.guildId);
+		const guildLocale = cdb.settings.locale ?? defaultLocale;
 		const { current, embeds, actionRow } = await settingsPage(interaction, guildLocale, 'language');
-		const description = `${getLocale(guildLocale, 'CMD.SETTINGS.RESPONSE.HEADER', interaction.guild.name)}\n\n**${getLocale(guildLocale, 'CMD.SETTINGS.MISC.LANGUAGE.NAME')}** ─ ${getLocale(guildLocale, 'CMD.SETTINGS.MISC.LANGUAGE.DESCRIPTION')}\n> ${getLocale(guildLocale, 'MISC.CURRENT')}: \`${current}\``;
+		const description = `${getGuildLocale(interaction.guildId, 'CMD.SETTINGS.RESPONSE.HEADER', interaction.guild.name)}\n\n**${getGuildLocale(interaction.guildId, 'CMD.SETTINGS.MISC.LANGUAGE.NAME')}** ─ ${getGuildLocale(interaction.guildId, 'CMD.SETTINGS.MISC.LANGUAGE.DESCRIPTION')}\n> ${getGuildLocale(interaction.guildId, 'MISC.CURRENT')}: \`${current}\``;
 		const args = [
 			[description, ...embeds],
 			{
@@ -42,7 +43,7 @@ export default {
 						.addComponents(
 							SelectMenuBuilder.from(interaction.message.components[0].components[0])
 								.setOptions(
-									settingsOptions.map(opt => ({ label: getLocale(guildLocale, `CMD.SETTINGS.MISC.${opt.toUpperCase()}.NAME`), description: getLocale(guildLocale, `CMD.SETTINGS.MISC.${opt.toUpperCase()}.DESCRIPTION`), value: opt, default: opt === 'language' })),
+									settingsOptions.map(opt => ({ label: getGuildLocale(interaction.guildId, `CMD.SETTINGS.MISC.${opt.toUpperCase()}.NAME`), description: getGuildLocale(interaction.guildId, `CMD.SETTINGS.MISC.${opt.toUpperCase()}.DESCRIPTION`), value: opt, default: opt === 'language' })),
 								),
 						),
 					actionRow,

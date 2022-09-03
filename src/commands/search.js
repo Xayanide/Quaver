@@ -43,14 +43,14 @@ export default {
 						return `\`${(index + 1).toString().padStart(tracks.length.toString().length, ' ')}.\` **[${escapeMarkdown(track.info.title)}](${track.info.uri})** \`[${durationString}]\``;
 					}).join('\n'),
 				)
-				.setFooter({ text: await getGuildLocale(interaction.guildId, 'MISC.PAGE', '1', pages.length) }),
+				.setFooter({ text: getGuildLocale(interaction.guildId, 'MISC.PAGE', '1', pages.length) }),
 			{
 				components: [
 					new ActionRowBuilder()
 						.addComponents(
 							new SelectMenuBuilder()
 								.setCustomId('search')
-								.setPlaceholder(await getGuildLocale(interaction.guildId, 'CMD.SEARCH.MISC.PICK'))
+								.setPlaceholder(getGuildLocale(interaction.guildId, 'CMD.SEARCH.MISC.PICK'))
 								.addOptions(pages[0].map((track, index) => {
 									let label = `${index + 1}. ${track.info.title}`;
 									if (label.length >= 100) label = `${label.substring(0, 97)}...`;
@@ -75,11 +75,11 @@ export default {
 								.setCustomId('search_add')
 								.setStyle(ButtonStyle.Success)
 								.setDisabled(true)
-								.setLabel(await getGuildLocale(interaction.guildId, 'MISC.ADD')),
+								.setLabel(getGuildLocale(interaction.guildId, 'MISC.ADD')),
 							new ButtonBuilder()
 								.setCustomId('cancel')
 								.setStyle(ButtonStyle.Secondary)
-								.setLabel(await getGuildLocale(interaction.guildId, 'MISC.CANCEL')),
+								.setLabel(getGuildLocale(interaction.guildId, 'MISC.CANCEL')),
 						),
 				],
 				fetchReply: true,
@@ -91,7 +91,7 @@ export default {
 			await message.edit(
 				messageDataBuilder(
 					new EmbedBuilder()
-						.setDescription(await getGuildLocale(message.guildId, 'DISCORD.INTERACTION.EXPIRED')),
+						.setDescription(getGuildLocale(message.guildId, 'DISCORD.INTERACTION.EXPIRED')),
 					{ components: [] },
 				),
 			);

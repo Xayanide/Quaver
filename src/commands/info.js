@@ -17,7 +17,7 @@ export default {
 		return interaction.replyHandler.reply(
 			new EmbedBuilder()
 				.setTitle('Quaver')
-				.setDescription(await getGuildLocale(interaction.guildId, 'CMD.INFO.RESPONSE.SUCCESS', interaction.client.generateInvite({ permissions: [PermissionsBitField.Flags.Administrator], scopes: ['bot', 'applications.commands'] }), version))
+				.setDescription(getGuildLocale(interaction.guildId, 'CMD.INFO.RESPONSE.SUCCESS', interaction.client.generateInvite({ permissions: [PermissionsBitField.Flags.Administrator], scopes: ['bot', 'applications.commands'] }), version))
 				.setThumbnail(interaction.client.user.displayAvatarURL({ format: 'png' })),
 			{ ephemeral: true },
 		);
