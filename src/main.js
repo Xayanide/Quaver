@@ -11,10 +11,7 @@ import { msToTime, msToTimeString, getGuildLocale, getAbsoluteFileURL } from '#l
 import { logger, data, setLocales } from '#lib/util/common.js';
 import { createServer } from 'https';
 
-export let startup = false;
-export function updateStartup() {
-	startup = true;
-}
+export const startup = { started: false };
 
 const rl = createInterface({
 	input: process.stdin,
@@ -26,7 +23,7 @@ rl.on('line', async input => {
 			await shuttingDown('exit');
 			break;
 		case 'sessions':
-			if (!startup) {
+			if (!startup.started) {
 				console.log('Quaver is not initialized yet.');
 				break;
 			}
@@ -39,7 +36,7 @@ rl.on('line', async input => {
 			break;
 		}
 		case 'whitelist': {
-			if (!startup) {
+			if (!startup.started) {
 				console.log('Quaver is not initialized yet.');
 				break;
 			}
@@ -114,7 +111,7 @@ data.guild.instance.on('error', async err => {
 });
 
 /** @type {Client & {commands: Collection, autocomplete: Collection, buttons: Collection, selects: Collection, modals: Collection music: Node}} */
-export const bot = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildPresences, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildVoiceStates] });
+export const bot = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates] });
 bot.commands = new Collection();
 bot.autocomplete = new Collection();
 bot.music = new Node({
@@ -144,7 +141,7 @@ export async function shuttingDown(eventType, err) {
 	inProgress = true;
 	logger.info({ message: `Shutting down${eventType ? ` due to ${eventType}` : ''}...`, label: 'Quaver' });
 	try {
-		if (startup) {
+		if (startup.started) {
 			const players = bot.music.players;
 			if (players.size < 1) return;
 			logger.info({ message: 'Disconnecting from all guilds...', label: 'Quaver' });
