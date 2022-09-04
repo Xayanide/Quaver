@@ -1,4 +1,4 @@
-import { ButtonBuilder, ButtonStyle, EmbedBuilder, ActionRowBuilder, ModalBuilder, TextInputBuilder, TextInputStyle } from 'discord.js';
+import { ButtonBuilder, EmbedBuilder, ActionRowBuilder, ModalBuilder, TextInputBuilder, TextInputStyle, escapeMarkdown } from 'discord.js';
 import { paginate, msToTime, msToTimeString, getGuildLocale } from '#lib/util/util.js';
 
 export default {
@@ -34,25 +34,16 @@ export default {
 			.setDescription(pages[page - 1].map((track, index) => {
 				const duration = msToTime(track.length);
 				const durationString = track.isStream ? '∞' : msToTimeString(duration, true);
-				return `\`${(firstIndex + index).toString().padStart(largestIndexSize, ' ')}.\` **[${track.title.length >= 50 ? `${track.title.substring(0, 47)}...` : track.title}](${track.uri})** \`[${durationString}]\` <@${track.requester}>`;
+				return `\`${(firstIndex + index).toString().padStart(largestIndexSize, ' ')}.\` **[${escapeMarkdown(track.title)}](${track.uri})** \`[${durationString}]\` <@${track.requester}>`;
 			}).join('\n'))
 			.setFooter({ text: await getGuildLocale(interaction.guildId, 'MISC.PAGE', page, pages.length) });
 		original.components[0] = ActionRowBuilder.from(original.components[0]);
-		original.components[0].components = [];
-		original.components[0].components[0] = new ButtonBuilder()
+		original.components[0].components[0] = ButtonBuilder.from(original.components[0].components[0])
 			.setCustomId(`queue_${page - 1}`)
-			.setEmoji('⬅️')
-			.setDisabled(page - 1 < 1)
-			.setStyle(ButtonStyle.Primary);
-		original.components[0].components[1] = new ButtonBuilder()
-			.setCustomId('queue_goto')
-			.setStyle(ButtonStyle.Secondary)
-			.setLabel(await getGuildLocale(interaction.guildId, 'MISC.GO_TO')),
-		original.components[0].components[2] = new ButtonBuilder()
+			.setDisabled(page - 1 < 1),
+		original.components[0].components[2] = ButtonBuilder.from(original.components[0].components[2])
 			.setCustomId(`queue_${page + 1}`)
-			.setEmoji('➡️')
-			.setDisabled(page + 1 > pages.length)
-			.setStyle(ButtonStyle.Primary);
+			.setDisabled(page + 1 > pages.length);
 		return interaction.replyHandler.reply(original.embeds, { components: original.components, force: 'update' });
 	},
 };

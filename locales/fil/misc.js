@@ -7,11 +7,12 @@ export default {
 	CANCEL: 'Kanselahin',
 	LOADING: 'Naglo-load...',
 	MORE_THAN_A_DAY: 'higit sa isang araw',
-	YOUR_SEARCH: 'ang iyong hinahanap',
+	YOUR_SEARCH: 'iyong hinahanap',
 	ADDED_BY: 'Idinagdag ni <@%1>',
 	STAGE_TOPIC: 'Musika ni Quaver',
 	LIVE: 'LIVE',
 	STREAMING: 'Streaming',
 	ACTION_IRREVERSIBLE: 'Ang aksyon na ito ay hindi na mababawi.',
-	CONFIRM: 'Kumpirmahin'
+	CONFIRM: 'Kumpirmahin',
+	ADD: 'Idagdag'
 };

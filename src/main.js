@@ -18,10 +18,8 @@ if (process.env.REPLIT_DB_URL !== undefined) {
 	startHttpServer();
 }
 
-export let startup = false;
-export function updateStartup() {
-	startup = true;
-}
+export const startup = { started: false };
+
 const rl = createInterface({
 	input: process.stdin,
 	output: process.stdout,
@@ -32,7 +30,7 @@ rl.on('line', async input => {
 			await shuttingDown('exit');
 			break;
 		case 'sessions':
-			if (!startup) {
+			if (!startup.started) {
 				console.log('Quaver is not initialized yet.');
 				break;
 			}
@@ -45,7 +43,7 @@ rl.on('line', async input => {
 			break;
 		}
 		case 'whitelist': {
-			if (!startup) {
+			if (!startup.started) {
 				console.log('Quaver is not initialized yet.');
 				break;
 			}
@@ -102,15 +100,13 @@ if (io) {
 }
 if (httpServer) httpServer.listen(features.web.port);
 
-if (features.spotify.enabled) {
-	load({
-		client: {
-			id: features.spotify.client_id,
-			secret: features.spotify.client_secret,
-		},
-		autoResolveYoutubeTracks: !!process.env.SPOTIFY_AUTO_RESOLVE_YT,
-	});
-}
+load({
+	client: {
+		id: features.spotify.client_id,
+		secret: features.spotify.client_secret,
+	},
+	autoResolveYoutubeTracks: !!process.env.SPOTIFY_AUTO_RESOLVE_YT,
+});
 
 /**
  * Handles database connection errors from Keyv.
@@ -122,7 +118,7 @@ data.guild.instance.on('error', async err => {
 });
 
 /** @type {Client & {commands: Collection, buttons: Collection, selects: Collection, music: Node}} */
-export const bot = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildPresences, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildVoiceStates] });
+export const bot = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates] });
 bot.commands = new Collection();
 bot.autocomplete = new Collection();
 bot.music = new Node({
@@ -152,7 +148,7 @@ export async function shuttingDown(eventType, err) {
 	inProgress = true;
 	logger.info({ message: `Shutting down${eventType ? ` due to ${eventType}` : ''}...`, label: 'Quaver' });
 	try {
-		if (startup) {
+		if (startup.started) {
 			const players = bot.music.players;
 			if (players.size < 1) return;
 			logger.info({ message: 'Disconnecting from all guilds...', label: 'Quaver' });
