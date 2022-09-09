@@ -1,6 +1,6 @@
 {
   "name": "quaver",
-  "version": "5.2.2-next.1",
+  "version": "5.2.3-next.1",
   "type": "module",
   "engines": {
     "node": ">=16.9.0"
@@ -11,7 +11,7 @@
     "@lavaclient/queue": "^2.1.1",
     "@lavaclient/spotify": "^3.1.0",
     "crypto-js": "^4.1.1",
-    "discord-api-types": "^0.37.7",
+    "discord-api-types": "^0.37.8",
     "discord.js": "^14.3.0",
     "genversion": "^3.1.1",
     "jsonwebtoken": "^8.5.1",
