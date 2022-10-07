@@ -1,19 +1,19 @@
 import { SlashCommandBuilder, ActionRowBuilder, SelectMenuBuilder, ChannelType, EmbedBuilder, ButtonBuilder, ButtonStyle, escapeMarkdown } from 'discord.js';
 import { defaultLocale } from '#settings';
 import { checks } from '#lib/util/constants.js';
-import { getGuildLocale, getLocale, messageDataBuilder, msToTime, msToTimeString, paginate } from '#lib/util/util.js';
-import { searchState } from '#lib/util/common.js';
+import { getGuildLocaleString, getLocaleString, messageDataBuilder, msToTime, msToTimeString, paginate } from '#lib/util/util.js';
+import { logger, searchState } from '#lib/util/common.js';
 
 // credit: https://github.com/lavaclient/djs-v13-example/blob/main/src/commands/Play.ts
 
 export default {
 	data: new SlashCommandBuilder()
 		.setName('search')
-		.setDescription(getLocale(defaultLocale, 'CMD.SEARCH.DESCRIPTION'))
+		.setDescription(getLocaleString(defaultLocale, 'CMD.SEARCH.DESCRIPTION'))
 		.addStringOption(option =>
 			option
 				.setName('query')
-				.setDescription(getLocale(defaultLocale, 'CMD.SEARCH.OPTION.QUERY'))
+				.setDescription(getLocaleString(defaultLocale, 'CMD.SEARCH.OPTION.QUERY'))
 				.setRequired(true)
 				.setAutocomplete(true)),
 	checks: [checks.GUILD_ONLY],
@@ -43,14 +43,14 @@ export default {
 						return `\`${(index + 1).toString().padStart(tracks.length.toString().length, ' ')}.\` **[${escapeMarkdown(track.info.title)}](${track.info.uri})** \`[${durationString}]\``;
 					}).join('\n'),
 				)
-				.setFooter({ text: await getGuildLocale(interaction.guildId, 'MISC.PAGE', '1', pages.length) }),
+				.setFooter({ text: await getGuildLocaleString(interaction.guildId, 'MISC.PAGE', '1', pages.length) }),
 			{
 				components: [
 					new ActionRowBuilder()
 						.addComponents(
 							new SelectMenuBuilder()
 								.setCustomId('search')
-								.setPlaceholder(await getGuildLocale(interaction.guildId, 'CMD.SEARCH.MISC.PICK'))
+								.setPlaceholder(await getGuildLocaleString(interaction.guildId, 'CMD.SEARCH.MISC.PICK'))
 								.addOptions(pages[0].map((track, index) => {
 									let label = `${index + 1}. ${track.info.title}`;
 									if (label.length >= 100) label = `${label.substring(0, 97)}...`;
@@ -75,11 +75,11 @@ export default {
 								.setCustomId('search_add')
 								.setStyle(ButtonStyle.Success)
 								.setDisabled(true)
-								.setLabel(await getGuildLocale(interaction.guildId, 'MISC.ADD')),
+								.setLabel(await getGuildLocaleString(interaction.guildId, 'MISC.ADD')),
 							new ButtonBuilder()
 								.setCustomId('cancel')
 								.setStyle(ButtonStyle.Secondary)
-								.setLabel(await getGuildLocale(interaction.guildId, 'MISC.CANCEL')),
+								.setLabel(await getGuildLocaleString(interaction.guildId, 'MISC.CANCEL')),
 						),
 				],
 				fetchReply: true,
@@ -88,13 +88,18 @@ export default {
 		searchState[msg.id] = {};
 		searchState[msg.id].pages = pages;
 		searchState[msg.id].timeout = setTimeout(async message => {
-			await message.edit(
-				messageDataBuilder(
-					new EmbedBuilder()
-						.setDescription(await getGuildLocale(message.guildId, 'DISCORD.INTERACTION.EXPIRED')),
-					{ components: [] },
-				),
-			);
+			try {
+				await message.edit(
+					messageDataBuilder(
+						new EmbedBuilder()
+							.setDescription(await getGuildLocaleString(message.guildId, 'DISCORD.INTERACTION.EXPIRED')),
+						{ components: [] },
+					),
+				);
+			}
+			catch (err) {
+				logger.error({ message: `${err.message}\n${err.stack}`, label: 'Quaver' });
+			}
 			delete searchState[message.id];
 		}, 30 * 1000, msg);
 		searchState[msg.id].selected = [];
