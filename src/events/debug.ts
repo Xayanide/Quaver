@@ -1,10 +1,10 @@
-import { logger } from '#lib/util/common.js';
+import { logger } from '#src/lib/util/common.js';
 
 export default {
 	name: 'debug',
 	once: false,
 	/** @param {string} */
-	async execute(message) {
+	async execute(message: string): Promise<void> {
 		if (process.argv?.includes('--debug')) console.log(message.includes('Provided token') ? '' : message);
 		if (message.includes('Event Code: 1006') || message.includes('429 hit on route /')) {
 			const { shuttingDown } = await import('#src/main.js');
