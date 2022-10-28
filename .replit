@@ -1,4 +1,4 @@
-run = "npm run start"
+run = "git fetch && git pull && npm run build-start"
 
 hidden=["database.sqlite", ".config"]
 

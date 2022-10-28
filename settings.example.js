@@ -17,6 +17,7 @@ export const colors = {
 // This locale is also used for all logs, slash command descriptions (at time of deployment), and for all guilds that don't specify a locale.
 // If changing default locale, re-deploy commands for it to take effect in slash command descriptions.
 export const defaultLocaleCode = 'en';
+export const disableAd = false;
 // An array of user IDs that are given manager-level permission on Quaver. Doesn't do much for now.
 export const managers = [
 	'Paste your user ID here',
@@ -83,5 +84,6 @@ export const features = {
 			key: 'key.pem',
 			cert: 'cert.pem',
 		},
+		dashboardURL: 'http://example.com',
 	},
 };
