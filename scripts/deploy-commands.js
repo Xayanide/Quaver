@@ -10,8 +10,6 @@ import { Collection } from 'discord.js';
 import { token, applicationId } from '../settings.js'
 import { getAbsoluteFileURL } from '../dist/lib/util/util.js';
 import { setLocales } from '../dist/lib/util/common.js';
-import { getAbsoluteFileURL } from '../dist/lib/util/util.js';
-import settings from '../settings.json' assert { type: 'json' };
 
 const locales = new Collection();
 const localeFolders = readdirSync(getAbsoluteFileURL(import.meta.url, ['..', 'locales']));
