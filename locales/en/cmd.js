@@ -53,7 +53,13 @@ export default {
 	INFO: {
 		DESCRIPTION: 'Show information about Quaver.',
 		RESPONSE: {
-			SUCCESS: 'Open-source music bot for small communities.\nSource code available [here](https://go.zptx.dev/Quaver), invite [here](%1).\nRunning version `%2`.'
+			SUCCESS: 'Open-source music bot for small communities.\nRunning version `%1`.',
+			MENTION: 'Hi! Quaver uses [Slash Commands](https://support.discord.com/hc/en-us/articles/1500000368501-Slash-Commands-FAQ).\nFor more information about Quaver, try </info:%1>. To play a track, try </play:%2> or </search:%3>.'
+		},
+		MISC: {
+			SOURCE_CODE: 'Source Code',
+			INVITE: 'Invite',
+			SPONSOR_US: 'Sponsor Us'
 		}
 	},
 	LOOP: {
@@ -72,6 +78,16 @@ export default {
 			SUCCESS: 'Looping mode set to **%1**'
 		}
 	},
+	LYRICS: {
+		DESCRIPTION: 'Look up lyrics.',
+		OPTION: {
+			QUERY: 'Search query. If not specified, uses the currently playing track.'
+		},
+		RESPONSE: {
+			NO_QUERY: 'No search query was specified.',
+			NO_RESULTS: 'No results for that query were found.'
+		}
+	},
 	MOVE: {
 		DESCRIPTION: 'Move a track within the queue.',
 		OPTION: {
@@ -79,7 +95,7 @@ export default {
 			NEW_POSITION: 'The new position of the track.'
 		},
 		RESPONSE: {
-			SUCCESS: 'Moved **[%1](%2)** `%3 -> %4`',
+			SUCCESS: 'Moved [**%1**](%2) `%3 -> %4`',
 			QUEUE_INSUFFICIENT_TRACKS: 'There aren\'t enough tracks in the queue to perform a move.',
 			OUT_OF_RANGE: 'Your input was invalid.',
 			MOVING_IN_PLACE: 'You can\'t move a track to the same position it is already in.'
@@ -148,7 +164,7 @@ export default {
 			POSITION: 'The position of the track to remove.'
 		},
 		RESPONSE: {
-			SUCCESS: 'Removed **[%1](%2)**',
+			SUCCESS: 'Removed [**%1**](%2)',
 			QUEUE_EMPTY: 'There are no tracks in the queue to remove.'
 		}
 	},
@@ -179,7 +195,11 @@ export default {
 			SECONDS: 'The seconds position for the target timestamp.'
 		},
 		RESPONSE: {
-			SUCCESS: 'Seeking to `[%1 / %2]`',
+			SUCCESS: {
+				DEFAULT: 'Seeking to `[%1 / %2]`',
+				FORCED: 'Seeking to `[%1 / %2]` by force',
+				MANAGER: 'Seeking to `[%1 / %2]` by manager bypass'
+			},
 			TIMESTAMP_MISSING: 'Please specify a timestamp to seek to.',
 			TIMESTAMP_INVALID: 'The timestamp provided exceeds the track\'s duration of `%1`.',
 			STREAM_CANNOT_SEEK: 'Seek cannot be used for streams.'
@@ -220,11 +240,13 @@ export default {
 		DESCRIPTION: 'Skip the current track.',
 		RESPONSE: {
 			SUCCESS: {
-				DEFAULT: 'Skipped **[%1](%2)**',
-				VOTED: 'Skipped **[%1](%2)** by voting'
+				DEFAULT: 'Skipped [**%1**](%2)',
+				VOTED: 'Skipped [**%1**](%2) by voting',
+				FORCED: 'Skipped [**%1**](%2) by force',
+				MANAGER: 'Skipped [**%1**](%2) by manager bypass'
 			},
 			VOTED: {
-				SUCCESS: 'Voted to skip **[%1](%2)** `[%3 / %4]`',
+				SUCCESS: 'Voted to skip [**%1**](%2) `[%3 / %4]`',
 				STATE_UNCHANGED: 'You have already voted to skip this track.'
 			}
 		}
