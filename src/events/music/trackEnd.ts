@@ -34,10 +34,13 @@ export default {
             queue.player.failed++;
             if (queue.player.failed >= 3) {
                 queue.clear();
+                await queue.skip();
+                await queue.start();
                 await queue.player.handler.locale(
                     'MUSIC.PLAYER.QUEUE_CLEARED_ERROR',
                 );
             }
+            return;
         }
         if (queue.player.failed) delete queue.player.failed;
         const members = bot.guilds.cache
