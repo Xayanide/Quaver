@@ -2,7 +2,7 @@ import type {
     MessageOptionsBuilderInputs,
     MessageOptionsBuilderOptions,
 } from '#src/lib/util/common.d.js';
-import { logger } from '#src/lib/util/common.js';
+import { logger, MessageOptionsBuilderType } from '#src/lib/util/common.js';
 import {
     buildMessageOptions,
     getGuildLocaleString,
@@ -72,7 +72,7 @@ export default class ReplyHandler {
     async reply(
         inputData: MessageOptionsBuilderInputs,
         {
-            type = 'neutral',
+            type = MessageOptionsBuilderType.Neutral,
             components = null,
             files = null,
             ephemeral = false,
@@ -87,11 +87,11 @@ export default class ReplyHandler {
         });
         replyMsgOpts.fetchReply = fetchReply;
         if (
-            force === 'reply' ||
+            force === ForceType.Reply ||
             (!this.interaction.replied && !this.interaction.deferred && !force)
         ) {
             if (
-                type === 'error' ||
+                type === MessageOptionsBuilderType.Error ||
                 ephemeral ||
                 (this.interaction.channel &&
                     !this.interaction.channel
@@ -118,7 +118,7 @@ export default class ReplyHandler {
             }
         }
         if (
-            force === 'update' &&
+            force === ForceType.Update &&
             !this.interaction.isCommand() &&
             (!this.interaction.isModalSubmit() ||
                 this.interaction.isFromMessage())
@@ -197,7 +197,7 @@ export default class ReplyHandler {
         stringPath: string,
         {
             vars = [],
-            type = 'neutral',
+            type = MessageOptionsBuilderType.Neutral,
             components = null,
             files = null,
             ephemeral = false,
@@ -220,4 +220,10 @@ export default class ReplyHandler {
             force,
         });
     }
+}
+
+export enum ForceType {
+    Reply,
+    Edit,
+    Update,
 }

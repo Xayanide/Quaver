@@ -1,8 +1,12 @@
+import { ForceType } from '#src/lib/ReplyHandler.js';
 import type {
     QuaverInteraction,
     QuaverPlayer,
 } from '#src/lib/util/common.d.js';
-import { confirmationTimeout } from '#src/lib/util/common.js';
+import {
+    confirmationTimeout,
+    MessageOptionsBuilderType,
+} from '#src/lib/util/common.js';
 import { checks } from '#src/lib/util/constants.js';
 import type { ButtonInteraction } from 'discord.js';
 import { GuildMember } from 'discord.js';
@@ -15,7 +19,7 @@ export default {
         if (interaction.message.interaction.user.id !== interaction.user.id) {
             await interaction.replyHandler.locale(
                 'DISCORD.INTERACTION.USER_MISMATCH',
-                { type: 'error' },
+                { type: MessageOptionsBuilderType.Error },
             );
             return;
         }
@@ -24,7 +28,7 @@ export default {
         ) as QuaverPlayer;
         if (!player) {
             await interaction.replyHandler.locale(checks.ACTIVE_SESSION, {
-                type: 'error',
+                type: MessageOptionsBuilderType.Error,
             });
             return;
         }
@@ -33,7 +37,7 @@ export default {
             !interaction.member?.voice.channelId
         ) {
             await interaction.replyHandler.locale(checks.IN_VOICE, {
-                type: 'error',
+                type: MessageOptionsBuilderType.Error,
             });
             return;
         }
@@ -42,7 +46,7 @@ export default {
             interaction.member?.voice.channelId !== player.channelId
         ) {
             await interaction.replyHandler.locale(checks.IN_SESSION_VOICE, {
-                type: 'error',
+                type: MessageOptionsBuilderType.Error,
             });
             return;
         }
@@ -51,7 +55,11 @@ export default {
         await player.handler.disconnect();
         await interaction.replyHandler.locale(
             'CMD.DISCONNECT.RESPONSE.SUCCESS',
-            { type: 'success', components: [], force: 'update' },
+            {
+                type: MessageOptionsBuilderType.Success,
+                components: [],
+                force: ForceType.Update,
+            },
         );
     },
 };

@@ -1,5 +1,10 @@
+import { ForceType } from '#src/lib/ReplyHandler.js';
 import type { QuaverInteraction } from '#src/lib/util/common.d.js';
-import { confirmationTimeout, searchState } from '#src/lib/util/common.js';
+import {
+    confirmationTimeout,
+    MessageOptionsBuilderType,
+    searchState,
+} from '#src/lib/util/common.js';
 import type { ButtonInteraction } from 'discord.js';
 
 export default {
@@ -10,7 +15,7 @@ export default {
         if (interaction.message.interaction.user.id !== interaction.user.id) {
             await interaction.replyHandler.locale(
                 'DISCORD.INTERACTION.USER_MISMATCH',
-                { type: 'error' },
+                { type: MessageOptionsBuilderType.Error },
             );
             return;
         }
@@ -21,7 +26,7 @@ export default {
         await interaction.replyHandler.locale('DISCORD.INTERACTION.CANCELED', {
             vars: [interaction.message.interaction.user.id],
             components: [],
-            force: 'update',
+            force: ForceType.Update,
         });
     },
 };

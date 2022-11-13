@@ -1,8 +1,14 @@
+import { ForceType } from '#src/lib/ReplyHandler.js';
 import type {
     QuaverInteraction,
     SettingsPageOptions,
 } from '#src/lib/util/common.d.js';
-import { confirmationTimeout, data, logger } from '#src/lib/util/common.js';
+import {
+    confirmationTimeout,
+    data,
+    logger,
+    MessageOptionsBuilderType,
+} from '#src/lib/util/common.js';
 import { settingsOptions } from '#src/lib/util/constants.js';
 import { settings } from '#src/lib/util/settings.js';
 import {
@@ -26,14 +32,14 @@ export default {
         if (interaction.message.interaction.user.id !== interaction.user.id) {
             await interaction.replyHandler.locale(
                 'DISCORD.INTERACTION.USER_MISMATCH',
-                { type: 'error' },
+                { type: MessageOptionsBuilderType.Error },
             );
             return;
         }
         if (!confirmationTimeout[interaction.message.id]) {
             await interaction.replyHandler.locale(
                 'DISCORD.INTERACTION.EXPIRED',
-                { components: [], force: 'update' },
+                { components: [], force: ForceType.Update },
             );
             return;
         }
@@ -116,7 +122,7 @@ export default {
                 ),
                 actionRow as ActionRowBuilder<MessageActionRowComponentBuilder>,
             ],
-            force: 'update',
+            force: ForceType.Update,
         });
     },
 };

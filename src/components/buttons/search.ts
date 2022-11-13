@@ -1,10 +1,15 @@
 import PlayerHandler from '#src/lib/PlayerHandler.js';
+import { ForceType } from '#src/lib/ReplyHandler.js';
 import type {
     QuaverChannels,
     QuaverInteraction,
     QuaverPlayer,
 } from '#src/lib/util/common.d.js';
-import { logger, searchState } from '#src/lib/util/common.js';
+import {
+    logger,
+    MessageOptionsBuilderType,
+    searchState,
+} from '#src/lib/util/common.js';
 import { checks } from '#src/lib/util/constants.js';
 import { settings } from '#src/lib/util/settings.js';
 import {
@@ -40,7 +45,7 @@ export default {
         if (interaction.message.interaction.user.id !== interaction.user.id) {
             await interaction.replyHandler.locale(
                 'DISCORD.INTERACTION.USER_MISMATCH',
-                { type: 'error' },
+                { type: MessageOptionsBuilderType.Error },
             );
             return;
         }
@@ -48,7 +53,7 @@ export default {
         if (!state) {
             await interaction.replyHandler.locale(
                 'DISCORD.INTERACTION.EXPIRED',
-                { components: [], force: 'update' },
+                { components: [], force: ForceType.Update },
             );
             return;
         }
@@ -64,7 +69,7 @@ export default {
                 !interaction.member?.voice.channelId
             ) {
                 await interaction.replyHandler.locale(checks.IN_VOICE, {
-                    type: 'error',
+                    type: MessageOptionsBuilderType.Error,
                 });
                 return;
             }
@@ -73,7 +78,7 @@ export default {
                 interaction.member?.voice.channelId !== player.channelId
             ) {
                 await interaction.replyHandler.locale(checks.IN_SESSION_VOICE, {
-                    type: 'error',
+                    type: MessageOptionsBuilderType.Error,
                 });
                 return;
             }
@@ -93,7 +98,7 @@ export default {
             ) {
                 await interaction.replyHandler.locale(
                     'DISCORD.INSUFFICIENT_PERMISSIONS.BOT.BASIC',
-                    { type: 'error' },
+                    { type: MessageOptionsBuilderType.Error },
                 );
                 return;
             }
@@ -104,7 +109,7 @@ export default {
             ) {
                 await interaction.replyHandler.locale(
                     'DISCORD.INSUFFICIENT_PERMISSIONS.BOT.STAGE',
-                    { type: 'error' },
+                    { type: MessageOptionsBuilderType.Error },
                 );
                 return;
             }
@@ -112,14 +117,14 @@ export default {
             if (me.isCommunicationDisabled()) {
                 await interaction.replyHandler.locale(
                     'DISCORD.INSUFFICIENT_PERMISSIONS.BOT.TIMED_OUT',
-                    { type: 'error' },
+                    { type: MessageOptionsBuilderType.Error },
                 );
                 return;
             }
             clearTimeout(state.timeout);
             await interaction.replyHandler.locale('MISC.LOADING', {
                 components: [],
-                force: 'update',
+                force: ForceType.Update,
             });
             const resolvedTracks = [];
             for (const track of tracks) {
@@ -172,7 +177,10 @@ export default {
                         timedOut
                             ? await interaction.replyHandler.locale(
                                   'DISCORD.INSUFFICIENT_PERMISSIONS.BOT.TIMED_OUT',
-                                  { type: 'error', components: [] },
+                                  {
+                                      type: MessageOptionsBuilderType.Error,
+                                      components: [],
+                                  },
                               )
                             : await interaction.replyHandler.locale(
                                   'DISCORD.INTERACTION.CANCELED',
@@ -212,7 +220,7 @@ export default {
                               }`
                             : null,
                     }),
-                { type: 'success', components: [] },
+                { type: MessageOptionsBuilderType.Success, components: [] },
             );
             if (!started) await player.queue.start();
             if (settings.features.web.enabled) {
@@ -397,7 +405,7 @@ export default {
             .setDisabled(page + 1 > pages.length);
         await interaction.replyHandler.reply(updated.embeds, {
             components: updated.components,
-            force: 'update',
+            force: ForceType.Update,
         });
     },
 };
