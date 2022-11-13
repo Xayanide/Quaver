@@ -1,6 +1,6 @@
 import type { QuaverInteraction } from '#src/lib/util/common.d.js';
 import { MessageOptionsBuilderType } from '#src/lib/util/common.js';
-import { checks } from '#src/lib/util/constants.js';
+import { Check } from '#src/lib/util/constants.js';
 import { settings } from '#src/lib/util/settings.js';
 import {
     getLocaleString,
@@ -60,10 +60,10 @@ export default {
                     .setMaxValue(59),
         ),
     checks: [
-        checks.GUILD_ONLY,
-        checks.ACTIVE_SESSION,
-        checks.IN_VOICE,
-        checks.IN_SESSION_VOICE,
+        Check.GuildOnly,
+        Check.ActiveSession,
+        Check.InVoice,
+        Check.InSessionVoice,
     ],
     permissions: {
         user: [],
@@ -89,7 +89,6 @@ export default {
             );
             return;
         }
-        // TODO: Web does not have these permission checks yet
         if (
             player.queue.current.requester !== interaction.user.id &&
             interaction.channel

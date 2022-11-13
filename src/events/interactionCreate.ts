@@ -1,7 +1,7 @@
 import ReplyHandler from '#src/lib/ReplyHandler.js';
 import type { QuaverInteraction } from '#src/lib/util/common.d.js';
 import { logger, MessageOptionsBuilderType } from '#src/lib/util/common.js';
-import { checks } from '#src/lib/util/constants.js';
+import { Check } from '#src/lib/util/constants.js';
 import type { Interaction } from 'discord.js';
 import { GuildMember, PermissionsBitField } from 'discord.js';
 import type {
@@ -44,20 +44,17 @@ export default {
             const failedChecks = [];
             for (const check of command.checks) {
                 switch (check) {
-                    // Only allowed in guild
-                    case checks.GUILD_ONLY:
+                    case Check.GuildOnly:
                         if (!interaction.guildId) failedChecks.push(check);
                         break;
-                    // Must have an active session
-                    case checks.ACTIVE_SESSION: {
+                    case Check.ActiveSession: {
                         const player = interaction.client.music.players.get(
                             interaction.guildId,
                         );
                         if (!player) failedChecks.push(check);
                         break;
                     }
-                    // Must be in a voice channel
-                    case checks.IN_VOICE:
+                    case Check.InVoice:
                         if (
                             !(interaction.member instanceof GuildMember) ||
                             !interaction.member?.voice.channelId
@@ -65,8 +62,7 @@ export default {
                             failedChecks.push(check);
                         }
                         break;
-                    // Must be in the same voice channel (will not fail if the bot is not in a voice channel)
-                    case checks.IN_SESSION_VOICE: {
+                    case Check.InSessionVoice: {
                         const player = interaction.client.music.players.get(
                             interaction.guildId,
                         );
