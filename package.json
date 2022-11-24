@@ -1,6 +1,6 @@
 {
   "name": "quaver",
-  "version": "6.6.0-next.5",
+  "version": "6.6.0",
   "type": "module",
   "engines": {
     "node": ">=16.9.0"
@@ -21,7 +21,7 @@
     "hangul-romanization": "^1.0.1",
     "jsonwebtoken": "^8.5.1",
     "keyv": "^4.5.2",
-    "kuroshiro": "~1.2.0",
+    "kuroshiro": "1.1.2",
     "kuroshiro-analyzer-kuromoji": "^1.1.0",
     "lavaclient": "^4.1.1",
     "lodash-es": "^4.17.21",
