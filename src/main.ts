@@ -18,6 +18,7 @@ import {
     getGuildLocaleString,
     msToTime,
     msToTimeString,
+    parseTimeString,
 } from '#src/lib/util/util.js';
 import '@lavaclient/queue/register';
 import { load } from '@lavaclient/spotify';
@@ -76,8 +77,10 @@ rl.on('line', async (input): Promise<void> => {
         case 'whitelist': {
             const guildId = input.split(' ')[1];
             const feature = input.split(' ')[2];
+            const duration = input.split(' ')[3];
+            let durationMs = -1;
             if (!guildId || !feature) {
-                console.log('Usage: whitelist <guildId> <feature>');
+                console.log('Usage: whitelist <guildId> <feature> [duration]');
                 break;
             }
             const guild = await bot.guilds.fetch(guildId);
@@ -85,54 +88,57 @@ rl.on('line', async (input): Promise<void> => {
                 console.log('Guild not found.');
                 break;
             }
-            switch (feature) {
-                case 'stay': {
-                    if (!settings.features.stay.whitelist) {
-                        console.log('The 24/7 whitelist is not enabled.');
-                        break;
-                    }
-                    const whitelisted = !(await data.guild.get<boolean>(
-                        guildId,
-                        'features.stay.whitelisted',
-                    ));
-                    await data.guild.set(
-                        guildId,
-                        'features.stay.whitelisted',
-                        whitelisted,
-                    );
-                    console.log(
-                        `${whitelisted ? 'Added' : 'Removed'} ${
-                            guild.name
-                        } to the 24/7 whitelist.`,
-                    );
-                    break;
-                }
-                case 'autolyrics': {
-                    if (!settings.features.autolyrics.whitelist) {
-                        console.log(
-                            'The Auto Lyrics whitelist is not enabled.',
-                        );
-                        break;
-                    }
-                    const whitelisted = !(await data.guild.get<boolean>(
-                        guildId,
-                        'features.autolyrics.whitelisted',
-                    ));
-                    await data.guild.set(
-                        guildId,
-                        'features.autolyrics.whitelisted',
-                        whitelisted,
-                    );
-                    console.log(
-                        `${whitelisted ? 'Added' : 'Removed'} ${
-                            guild.name
-                        } to the Auto Lyrics whitelist.`,
-                    );
-                    break;
-                }
-                default:
-                    console.log('Available features: stay, autolyrics');
+            if (!['stay', 'autolyrics'].includes(feature)) {
+                console.log('Available features: stay, autolyrics');
+                break;
             }
+            let featureName = '';
+            switch (feature) {
+                case 'stay':
+                    featureName = '24/7';
+                    break;
+                case 'autolyrics':
+                    featureName = 'Auto Lyrics';
+            }
+            if (
+                !settings.features[feature as 'stay' | 'autolyrics'].whitelist
+            ) {
+                console.log(`The ${featureName} whitelist is not enabled.`);
+                break;
+            }
+            if (duration) {
+                if (!parseTimeString(duration)) {
+                    console.log('Duration example: 5d1h, 1h30m, 10s');
+                    break;
+                }
+                durationMs = parseTimeString(duration);
+            }
+            const whitelisted = !!(await data.guild.get<number>(
+                guildId,
+                `features.${feature}.whitelisted`,
+            ));
+            if (whitelisted && !duration) {
+                await data.guild.unset(
+                    guildId,
+                    `features.${feature}.whitelisted`,
+                );
+                console.log(
+                    `Removed ${guild.name} from the ${featureName} whitelist.`,
+                );
+                break;
+            }
+            await data.guild.set(
+                guildId,
+                `features.${feature}.whitelisted`,
+                durationMs === -1 ? durationMs : Date.now() + durationMs,
+            );
+            console.log(
+                `Added ${guild.name} to the ${featureName} whitelist ${
+                    durationMs === -1
+                        ? 'permanently'
+                        : `for ${msToTimeString(msToTime(durationMs))}`
+                }.`,
+            );
             break;
         }
         case 'eval': {
