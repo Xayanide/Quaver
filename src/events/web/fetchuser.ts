@@ -6,6 +6,7 @@ import CryptoJS from 'crypto-js';
 import type { APIUser } from 'discord.js';
 import type { Socket } from 'socket.io';
 import { request } from 'undici';
+import type { WebUser } from './fetchuser.d.js';
 
 export default {
     name: 'fetchuser',
@@ -16,11 +17,19 @@ export default {
         callback: (cb: Record<string, any>) => void,
         token?: string,
     ): Promise<void> {
+        if (socket.user) {
+            return callback({ status: 'success', user: socket.user, version });
+        }
         if (!token) return;
-        const decryptedToken = CryptoJS.AES.decrypt(
-            token,
-            settings.features.web.encryptionKey,
-        ).toString(CryptoJS.enc.Utf8);
+        let decryptedToken;
+        try {
+            decryptedToken = CryptoJS.AES.decrypt(
+                token,
+                settings.features.web.encryptionKey,
+            ).toString(CryptoJS.enc.Utf8);
+        } catch (error) {
+            return callback({ status: 'error-generic' });
+        }
         const user = await request('https://discord.com/api/users/@me', {
             headers: {
                 Authorization: decryptedToken,
@@ -30,6 +39,8 @@ export default {
             user.body,
         )) as JSONResponse<APIUser>;
         if (response.message) return callback({ status: 'error-auth' });
+        const webUser = response as WebUser;
+        webUser.manager = settings.managers.includes(response.id);
         socket.user = response;
         return callback({ status: 'success', user: response, version });
     },

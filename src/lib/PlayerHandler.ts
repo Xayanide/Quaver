@@ -4,6 +4,7 @@ import type {
     QuaverChannels,
     QuaverClient,
     QuaverPlayer,
+    QuaverSong,
 } from '#src/lib/util/common.d.js';
 import {
     data,
@@ -18,7 +19,7 @@ import {
     sortQueue,
     WhitelistStatus,
 } from '#src/lib/util/util.js';
-import type { LoopType, Song } from '@lavaclient/queue';
+import type { LoopType } from '@lavaclient/queue';
 import type { Message, Snowflake } from 'discord.js';
 import { ChannelType, PermissionsBitField } from 'discord.js';
 
@@ -168,16 +169,50 @@ export default class PlayerHandler {
                 'settings.stay.text',
                 this.player.queue.channel.id,
             );
-        }
-        if (this.player.timeout) {
-            clearTimeout(this.player.timeout);
-            delete this.player.timeout;
+            if (this.player.timeout) {
+                clearTimeout(this.player.timeout);
+                delete this.player.timeout;
+                if (settings.features.web.enabled) {
+                    io.to(`guild:${this.player.guildId}`).emit(
+                        'timeoutUpdate',
+                        !!this.player.timeout,
+                    );
+                }
+            }
+        } else if (
+            !this.player.queue.current ||
+            (!this.player.playing && !this.player.paused)
+        ) {
+            if (this.player.timeout) clearTimeout(this.player.timeout);
+            this.player.timeout = setTimeout(
+                (p): void => {
+                    logger.info({
+                        message: `[G ${p.guildId}] Disconnecting (inactivity)`,
+                        label: 'Quaver',
+                    });
+                    p.handler.locale(
+                        'MUSIC.DISCONNECT.INACTIVITY.DISCONNECTED',
+                        {
+                            type: MessageOptionsBuilderType.Warning,
+                        },
+                    );
+                    p.handler.disconnect();
+                },
+                30 * 60 * 1000,
+                this.player,
+            );
+            this.player.timeoutEnd = Date.now() + 30 * 60 * 1000;
             if (settings.features.web.enabled) {
                 io.to(`guild:${this.player.guildId}`).emit(
                     'timeoutUpdate',
-                    !!this.player.timeout,
+                    this.player.timeoutEnd,
                 );
             }
+        }
+        if (settings.features.web.enabled) {
+            io.to(`guild:${this.player.guildId}`).emit('stayFeatureUpdate', {
+                enabled,
+            });
         }
         return PlayerResponse.Success;
     }
@@ -287,7 +322,9 @@ export default class PlayerHandler {
         const voiceChannel = this.client.guilds.cache
             .get(this.player.guildId)
             ?.channels.cache.get(channelId ?? this.player.channelId);
-        if (voiceChannel?.type !== ChannelType.GuildStageVoice) return;
+        if (voiceChannel?.type !== ChannelType.GuildStageVoice) {
+            return PlayerResponse.Success;
+        }
         const permissions = this.client.guilds.cache
             .get(this.player.guildId)
             ?.channels.cache.get(channelId ?? this.player.channelId)
@@ -375,16 +412,12 @@ export default class PlayerHandler {
         if (settings.features.web.enabled) {
             io.to(`guild:${this.player.guildId}`).emit(
                 'queueUpdate',
-                this.player.queue.tracks.map(
-                    (
-                        t: Song & { requesterTag: string },
-                    ): Song & { requesterTag: string } => {
-                        t.requesterTag = this.client.users.cache.get(
-                            t.requester,
-                        )?.tag;
-                        return t;
-                    },
-                ),
+                this.player.queue.tracks.map((t: QuaverSong): QuaverSong => {
+                    const user = this.client.users.cache.get(t.requester);
+                    t.requesterTag = user?.tag;
+                    t.requesterAvatar = user?.avatar;
+                    return t;
+                }),
             );
         }
         if (
@@ -455,16 +488,12 @@ export default class PlayerHandler {
         if (settings.features.web.enabled) {
             io.to(`guild:${this.player.guildId}`).emit(
                 'queueUpdate',
-                this.player.queue.tracks.map(
-                    (
-                        t: Song & { requesterTag: string },
-                    ): Song & { requesterTag: string } => {
-                        t.requesterTag = this.client.users.cache.get(
-                            t.requester,
-                        )?.tag;
-                        return t;
-                    },
-                ),
+                this.player.queue.tracks.map((t: QuaverSong): QuaverSong => {
+                    const user = this.client.users.cache.get(t.requester);
+                    t.requesterTag = user?.tag;
+                    t.requesterAvatar = user?.avatar;
+                    return t;
+                }),
             );
         }
         if (
@@ -484,7 +513,7 @@ export default class PlayerHandler {
      */
     async resume(): Promise<PlayerResponse> {
         const { io } = await import('#src/main.js');
-        if (this.player.paused) {
+        if (!this.player.paused) {
             return PlayerResponse.PlayerStateUnchanged;
         }
         await this.player.resume();
@@ -547,16 +576,12 @@ export default class PlayerHandler {
         if (settings.features.web.enabled) {
             io.to(`guild:${this.player.guildId}`).emit(
                 'queueUpdate',
-                this.player.queue.tracks.map(
-                    (
-                        t: Song & { requesterTag: string },
-                    ): Song & { requesterTag: string } => {
-                        t.requesterTag = this.client.users.cache.get(
-                            t.requester,
-                        )?.tag;
-                        return t;
-                    },
-                ),
+                this.player.queue.tracks.map((t: QuaverSong): QuaverSong => {
+                    const user = this.client.users.cache.get(t.requester);
+                    t.requesterTag = user?.tag;
+                    t.requesterAvatar = user?.avatar;
+                    return t;
+                }),
             );
         }
         if (
@@ -595,16 +620,12 @@ export default class PlayerHandler {
         if (settings.features.web.enabled) {
             io.to(`guild:${this.player.guildId}`).emit(
                 'queueUpdate',
-                this.player.queue.tracks.map(
-                    (
-                        t: Song & { requesterTag: string },
-                    ): Song & { requesterTag: string } => {
-                        t.requesterTag = this.client.users.cache.get(
-                            t.requester,
-                        )?.tag;
-                        return t;
-                    },
-                ),
+                this.player.queue.tracks.map((t: QuaverSong): QuaverSong => {
+                    const user = this.client.users.cache.get(t.requester);
+                    t.requesterTag = user?.tag;
+                    t.requesterAvatar = user?.avatar;
+                    return t;
+                }),
             );
         }
         return PlayerResponse.Success;
@@ -654,6 +675,9 @@ export default class PlayerHandler {
      */
     async volume(volume: number): Promise<PlayerResponse> {
         const { io } = await import('#src/main.js');
+        if (volume < 0 || volume > 200) {
+            return PlayerResponse.InputOutOfRange;
+        }
         await this.player.setVolume(volume);
         if (settings.features.web.enabled) {
             io.to(`guild:${this.player.guildId}`).emit('volumeUpdate', volume);
