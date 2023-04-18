@@ -41,6 +41,7 @@ export default {
                 UpdateItemType.StayFeature,
                 UpdateItemType.AutoLyricsFeature,
                 UpdateItemType.SmartQueueFeature,
+                UpdateItemType.Add,
             ].includes(item.type) &&
             (await bot.guilds.cache.get(guildId)?.members.fetch(socket.user.id))
                 ?.voice.channelId !==
@@ -56,12 +57,15 @@ export default {
                 if (!(member instanceof GuildMember)) {
                     return callback({ status: Response.GenericError });
                 }
-                if (member.voice.channel.type !== ChannelType.GuildVoice) {
+                if (!member.voice.channelId) {
+                    return callback({ status: Response.UserNotInChannelError });
+                }
+                if (member.voice.channel?.type !== ChannelType.GuildVoice) {
                     return callback({
                         status: Response.ChannelUnsupportedError,
                     });
                 }
-                const permissions = member.voice.channel.permissionsFor(
+                const permissions = member.voice.channel?.permissionsFor(
                     bot.user.id,
                 );
                 if (
@@ -489,4 +493,5 @@ enum Response {
     BotTimedOutError = 'error-bot-timed-out',
     NoResultsError = 'error-no-results',
     SpotifyTooManyTracksError = 'error-spotify-too-many-tracks',
+    UserNotInChannelError = 'error-user-not-in-channel',
 }
