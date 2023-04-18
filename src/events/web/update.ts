@@ -215,7 +215,7 @@ export default {
                 if (
                     !(
                         await bot.guilds.cache
-                        .get(guildId)
+                            .get(guildId)
                             ?.members.fetch(socket.user.id)
                     )?.permissions.has(PermissionsBitField.Flags.ManageGuild)
                 ) {
@@ -256,7 +256,7 @@ export default {
                 if (
                     !(
                         await bot.guilds.cache
-                        .get(guildId)
+                            .get(guildId)
                             ?.members.fetch(socket.user.id)
                     )?.permissions.has(PermissionsBitField.Flags.ManageGuild)
                 ) {
