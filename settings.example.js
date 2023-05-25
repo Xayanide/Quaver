@@ -16,6 +16,13 @@ export const colors = {
 // Any locale from the locales folder. Quaver will not start if an invalid locale is selected.
 // This locale is also used for all logs, slash command descriptions (at time of deployment), and for all guilds that don't specify a locale.
 // If changing default locale, re-deploy commands for it to take effect in slash command descriptions.
+export const status = {
+	presence: 'online',
+	activityType: 'Listening',
+	name: 'music',
+	url: '',
+	showVersion: true,
+};
 export const defaultLocaleCode = 'en';
 export const disableAd = false;
 // An array of user IDs that are given manager-level permission on Quaver. Doesn't do much for now.
