@@ -55,16 +55,21 @@ export const lavalink = {
 };
 // Configurable features.
 export const features = {
-	// 24/7 feature
-	// Allows users to make Quaver stay in their voice channel regardless of activity.
-	stay: {
-		// Whether or not the feature is enabled.
+	autolyrics: {
 		enabled: true,
-		// Whether or not the feature requires guilds to be whitelisted.
 		whitelist: false,
+		premium: false,
 	},
-	// Spotify feature
-	// Allows users to use Spotify URIs to play music.
+	stay: {
+		enabled: true,
+		whitelist: false,
+		premium: false,
+	},
+	smartqueue: {
+		enabled: true,
+		whitelist: false,
+		premium: false,
+	},
 	spotify: {
 		// Whether or not the feature is enabled.
 		enabled: true,
