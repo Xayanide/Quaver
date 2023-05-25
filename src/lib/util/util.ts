@@ -15,14 +15,14 @@ import {
 } from '#src/lib/util/common.js';
 import { Check, Language } from '#src/lib/util/constants.js';
 import { settings } from '#src/lib/util/settings.js';
+import { getAbsoluteFileURL } from '@zptxdev/zptx-lib';
 import type {
     APIEmbedField,
     APISelectMenuOption,
+    BaseMessageOptions,
     ButtonInteraction,
     Interaction,
-    InteractionReplyOptions,
     MessageActionRowComponentBuilder,
-    MessageCreateOptions,
     ModalSubmitInteraction,
     RoleSelectMenuInteraction,
     Snowflake,
@@ -41,8 +41,6 @@ import {
 } from 'discord.js';
 import { readdirSync } from 'fs';
 import { get } from 'lodash-es';
-import { dirname, resolve } from 'path';
-import { fileURLToPath, pathToFileURL } from 'url';
 import type { LocaleCompletionState } from './util.d.js';
 
 /**
@@ -227,17 +225,6 @@ export async function getRequesterStatus(
     const botManager = settings.managers.includes(member.id);
     if (botManager) return RequesterStatus.ManagerBypass;
     return RequesterStatus.NotRequester;
-}
-
-/**
- * Returns an absolute file URL, readable by the ESM loader.
- * @param baseURL - The base URL of the module.
- * @param path - The path to the target file.
- * @returns The absolute file URL.
- */
-export function getAbsoluteFileURL(baseURL: string, path: string[]): URL {
-    const __dirname = dirname(fileURLToPath(baseURL));
-    return pathToFileURL(resolve(__dirname, ...path));
 }
 
 /**
@@ -459,7 +446,7 @@ export function buildMessageOptions(
         components = null,
         files = null,
     }: MessageOptionsBuilderOptions = {},
-): MessageCreateOptions & InteractionReplyOptions {
+): BaseMessageOptions {
     const messageData = Array.isArray(inputData) ? inputData : [inputData];
     const color: 'success' | 'neutral' | 'warning' | 'error' =
         MessageOptionsBuilderType[type].toLowerCase() as
@@ -476,7 +463,7 @@ export function buildMessageOptions(
         if (!msg.data.color) return msg.setColor(settings.colors[color]);
         return msg;
     });
-    const opts: MessageCreateOptions & InteractionReplyOptions = {
+    const opts: BaseMessageOptions = {
         embeds: embedData,
     };
     if (components !== null) opts.components = components;

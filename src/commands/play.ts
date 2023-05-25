@@ -5,7 +5,7 @@ import type {
     QuaverPlayer,
     QuaverSong,
 } from '#src/lib/util/common.d.js';
-import { data, MessageOptionsBuilderType } from '#src/lib/util/common.js';
+import { MessageOptionsBuilderType, data } from '#src/lib/util/common.js';
 import { Check } from '#src/lib/util/constants.js';
 import { settings } from '#src/lib/util/settings.js';
 import { getGuildLocaleString, getLocaleString } from '#src/lib/util/util.js';
@@ -19,10 +19,10 @@ import type {
 import {
     ChannelType,
     EmbedBuilder,
-    escapeMarkdown,
     GuildMember,
     PermissionsBitField,
     SlashCommandBuilder,
+    escapeMarkdown,
 } from 'discord.js';
 
 export default {
@@ -65,9 +65,11 @@ export default {
     ): Promise<void> {
         const { bot, io } = await import('#src/main.js');
         if (
-            ![ChannelType.GuildText, ChannelType.GuildVoice].includes(
-                interaction.channel.type,
-            )
+            ![
+                ChannelType.GuildText,
+                ChannelType.GuildVoice,
+                ChannelType.GuildStageVoice,
+            ].includes(interaction.channel.type)
         ) {
             await interaction.replyHandler.locale(
                 'DISCORD.CHANNEL_UNSUPPORTED',

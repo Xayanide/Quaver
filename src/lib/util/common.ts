@@ -4,8 +4,8 @@ import type { Snowflake } from 'discord.js';
 import { Collection } from 'discord.js';
 import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
-import type { transport } from 'winston';
-import { createLogger, format, transports } from 'winston';
+import type { Logform, transport } from 'winston';
+import { addColors, createLogger, format, transports } from 'winston';
 import LokiTransport from 'winston-loki';
 import type { SearchStateRecord } from './common.d.js';
 
@@ -23,8 +23,19 @@ export const data = {
         namespace: 'guild',
     }),
 };
+addColors({
+    verbose: 'blackBG dim bold',
+    info: 'greenBG white bold',
+    warn: 'yellowBG black bold',
+    error: 'redBG white bold',
+    verboseMsg: 'dim',
+    infoMsg: 'green',
+    warnMsg: 'yellow',
+    errorMsg: 'red',
+    meaningless: 'gray',
+});
 export const logger = createLogger({
-    level: 'info',
+    level: 'verbose',
     format: format.combine(
         format.errors({ stack: true }),
         format.timestamp(),
@@ -38,13 +49,18 @@ export const logger = createLogger({
     transports: [
         new transports.Console({
             format: format.combine(
-                // once again, i have stumbled across an unsolvable problem.
-                // TransformableInfo interface is not exported by winston,
-                // and i cannot find a way to somehow make it say that the
-                // arrow function returns a TransformableInfo object.
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                format((info): any => {
-                    info.level = info.level.toUpperCase();
+                format((info): Logform.TransformableInfo => {
+                    const colorizer = format.colorize();
+                    info.timestamp = colorizer.colorize(
+                        'meaningless',
+                        info.timestamp,
+                    );
+                    info.label = colorizer.colorize('meaningless', info.label);
+                    info.message = colorizer.colorize(
+                        `${info.level}Msg`,
+                        info.message,
+                    );
+                    info.level = ` ${info.level.toUpperCase()} `;
                     return info;
                 })(),
                 format.errors({ stack: true }),
@@ -52,7 +68,7 @@ export const logger = createLogger({
                 format.colorize(),
                 format.printf(
                     (info): string =>
-                        `${info.timestamp} [${info.label}] ${info.level}: ${info.message}`,
+                        `${info.timestamp} ${info.level} ${info.label} ${info.message}`,
                 ),
             ),
         }),
