@@ -1,15 +1,19 @@
+import { existsSync } from 'fs';
+import { dirname, resolve } from 'path';
+import { fileURLToPath, pathToFileURL } from 'url';
 import { getAbsoluteFileURL } from '@zptxdev/zptx-lib';
-import { existsSync, readFileSync } from 'fs';
 import type { SettingsObject } from './settings.d.js';
 
-export let settings: SettingsObject = {};
-const path = getAbsoluteFileURL(import.meta.url, [
+const settingsPath = getAbsoluteFileURL(import.meta.url, [
     '..',
     '..',
     '..',
-    'settings.json',
+    'settings.js',
 ]);
-if (!existsSync(path)) {
-    process.exit(1);
+if (!existsSync(settingsPath)) {
+    console.log(
+        `Could not find ${settingsPath}.\nMake a copy of settings.example.js, edit the fields as necessary and rename it to settings.js`,
+    );
 }
-settings = JSON.parse(readFileSync(path).toString());
+
+export const settings: SettingsObject = await import(settingsPath.toString());
