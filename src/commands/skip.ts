@@ -124,8 +124,8 @@ export default {
                         requesterStatus === RequesterStatus.Requester
                             ? 'CMD.SKIP.RESPONSE.SUCCESS.DEFAULT'
                             : requesterStatus === RequesterStatus.ManagerBypass
-                            ? 'CMD.SKIP.RESPONSE.SUCCESS.MANAGER'
-                            : 'CMD.SKIP.RESPONSE.SUCCESS.FORCED',
+                              ? 'CMD.SKIP.RESPONSE.SUCCESS.MANAGER'
+                              : 'CMD.SKIP.RESPONSE.SUCCESS.FORCED',
                         escapeMarkdown(track.title),
                         track.uri,
                     )}${

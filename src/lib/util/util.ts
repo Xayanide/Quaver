@@ -316,8 +316,8 @@ export function getButtonToggleComponents(
                             ? ButtonStyle.Success
                             : ButtonStyle.Secondary
                         : !enabled
-                        ? ButtonStyle.Success
-                        : ButtonStyle.Secondary,
+                          ? ButtonStyle.Success
+                          : ButtonStyle.Secondary,
                 )
                 .setDisabled(state === 'enable' ? enabled : !enabled),
     );
@@ -533,26 +533,26 @@ export async function buildSettingsPage(
                                       'CMD.SETTINGS.MISC.PREMIUM.DISPLAY.LOCKED.DEFAULT',
                                   )
                                 : whitelisted[key] !== -1 &&
-                                  Date.now() > whitelisted[key]
-                                ? getLocaleString(
-                                      guildLocaleCode,
-                                      'CMD.SETTINGS.MISC.PREMIUM.DISPLAY.LOCKED.EXPIRED',
-                                      Math.floor(
-                                          whitelisted[key] / 1000,
-                                      ).toString(),
-                                  )
-                                : whitelisted[key] === -1
-                                ? getLocaleString(
-                                      guildLocaleCode,
-                                      'CMD.SETTINGS.MISC.PREMIUM.DISPLAY.UNLOCKED.PERMANENT',
-                                  )
-                                : getLocaleString(
-                                      guildLocaleCode,
-                                      'CMD.SETTINGS.MISC.PREMIUM.DISPLAY.UNLOCKED.TEMPORARY',
-                                      Math.floor(
-                                          whitelisted[key] / 1000,
-                                      ).toString(),
-                                  )
+                                    Date.now() > whitelisted[key]
+                                  ? getLocaleString(
+                                        guildLocaleCode,
+                                        'CMD.SETTINGS.MISC.PREMIUM.DISPLAY.LOCKED.EXPIRED',
+                                        Math.floor(
+                                            whitelisted[key] / 1000,
+                                        ).toString(),
+                                    )
+                                  : whitelisted[key] === -1
+                                    ? getLocaleString(
+                                          guildLocaleCode,
+                                          'CMD.SETTINGS.MISC.PREMIUM.DISPLAY.UNLOCKED.PERMANENT',
+                                      )
+                                    : getLocaleString(
+                                          guildLocaleCode,
+                                          'CMD.SETTINGS.MISC.PREMIUM.DISPLAY.UNLOCKED.TEMPORARY',
+                                          Math.floor(
+                                              whitelisted[key] / 1000,
+                                          ).toString(),
+                                      )
                         }`,
                 );
             embeds = [

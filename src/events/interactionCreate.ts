@@ -38,11 +38,11 @@ async function handleFailedChecks(
             interaction.isChatInputCommand()
                 ? 'Command'
                 : interaction.isButton()
-                ? 'Button'
-                : interaction.isStringSelectMenu() ||
-                  interaction.isRoleSelectMenu()
-                ? 'Select menu'
-                : 'Modal'
+                  ? 'Button'
+                  : interaction.isStringSelectMenu() ||
+                      interaction.isRoleSelectMenu()
+                    ? 'Select menu'
+                    : 'Modal'
         } ${
             interaction.isChatInputCommand()
                 ? interaction.commandName
