@@ -151,8 +151,8 @@ export default {
                     requesterStatus === RequesterStatus.Requester
                         ? 'CMD.SEEK.RESPONSE.SUCCESS.DEFAULT'
                         : requesterStatus === RequesterStatus.ManagerBypass
-                        ? 'CMD.SEEK.RESPONSE.SUCCESS.MANAGER'
-                        : 'CMD.SEEK.RESPONSE.SUCCESS.FORCED',
+                          ? 'CMD.SEEK.RESPONSE.SUCCESS.MANAGER'
+                          : 'CMD.SEEK.RESPONSE.SUCCESS.FORCED',
                     {
                         vars: [targetString, durationString],
                     },

@@ -91,8 +91,8 @@ export default {
                     requesterStatus === RequesterStatus.Requester
                         ? 'CMD.REMOVE.RESPONSE.SUCCESS.DEFAULT'
                         : requesterStatus === RequesterStatus.ManagerBypass
-                        ? 'CMD.REMOVE.RESPONSE.SUCCESS.MANAGER'
-                        : 'CMD.REMOVE.RESPONSE.SUCCESS.FORCED',
+                          ? 'CMD.REMOVE.RESPONSE.SUCCESS.MANAGER'
+                          : 'CMD.REMOVE.RESPONSE.SUCCESS.FORCED',
                     {
                         vars: [escapeMarkdown(track.title), track.uri],
                         type: MessageOptionsBuilderType.Success,
