@@ -3,7 +3,7 @@ run = "git fetch && git pull && npm run build-start"
 hidden=["database.sqlite", ".config"]
 
 [nix]
-channel = "stable-22_11"
+channel = "stable-23_11"
 
 [languages.javascript]
 pattern = "**/{*.js,*.jsx,*.ts,*.tsx}"

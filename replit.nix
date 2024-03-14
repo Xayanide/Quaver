@@ -1,5 +1,6 @@
-{ pkgs }: {
-    deps = with pkgs; [
-        nodejs-19_x
-    ];
+{pkgs}: {
+	deps = with pkgs; 
+    [
+		nodejs_21
+	];
 }
