@@ -30,13 +30,13 @@
     "socket.io": "^4.7.5",
     "wanakana": "^5.3.1",
     "winston": "^3.13.0",
-    "winston-loki": "^6.0.8"
+    "winston-loki": "^6.1.0"
   },
   "devDependencies": {
     "@types/crypto-js": "^4.2.2",
     "@types/express": "^4.17.21",
     "@types/lodash-es": "^4.17.12",
-    "@types/node": "^20.12.5",
+    "@types/node": "^20.12.7",
     "@typescript-eslint/eslint-plugin": "^7.6.0",
     "@typescript-eslint/parser": "^7.6.0",
     "eslint": "^8.57.0",
