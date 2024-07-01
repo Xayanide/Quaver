@@ -24,10 +24,11 @@
     "kuroshiro": "1.2.0",
     "kuroshiro-analyzer-kuromoji": "^1.1.0",
     "lavaclient": "^5.0.0-rc.3",
-    "lavalink-protocol": "^1.0.1",
+    "lavalink-protocol": "^1.0.2",
     "lodash-es": "^4.17.21",
     "patch-package": "^8.0.0",
     "socket.io": "^4.7.5",
+    "undici": "^6.19.2",
     "wanakana": "^5.3.1",
     "winston": "^3.13.0",
     "winston-loki": "^6.1.2"
@@ -49,11 +50,10 @@
   "main": "dist/main.js",
   "scripts": {
     "postinstall": "patch-package",
-    "slash-deploy": "node scripts/deploy-commands.js",
-    "slash-delete": "node scripts/delete-commands.js",
+    "slash:deploy": "node scripts/deploy-commands.js",
+    "slash:delete": "node scripts/delete-commands.js",
     "migrate": "node scripts/migrate.js",
     "build": "rimraf dist/ && genversion --es6 --semi src/lib/util/version.ts && tsc && tsc-alias",
-    "build-start": "npm run build && npm start",
     "start": "node .",
     "dev": "node --enable-source-maps .",
     "lint": "eslint . --ext .ts"
