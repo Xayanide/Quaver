@@ -1,11 +1,11 @@
 'priority:p0':
-  - '(### Severity\n\nCritical)|(- \[x] Critical)'
+  - '- \[x] Critical'
 'priority:p1':
-  - '(### (Priority|Severity)\n\nHigh)|(- \[x] High)'
+  - '- \[x] High'
 'priority:p2':
-  - '(### (Priority|Severity)\n\nMedium)|(- \[x] Medium)'
+  - '- \[x] Medium'
 'priority:p3':
-  - '(### (Priority|Severity)\n\nLow)|(- \[x] Low)'
+  - '- \[x] Low'
 'pr:type:feat':
   - '(feat:|- \[x] Feature)'
 'pr:type:fix':
@@ -25,6 +25,6 @@
 'status:proposed':
   - '.*'
 'branch:stable':
-  - '(\* \[x]  Stable)|(- \[x] Stable)'
+  - '- \[x] Stable'
 'branch:next':
-  - '(\* \[x]  Next)|(- \[x] Next)'
+  - '- \[x] Next'
