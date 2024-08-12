@@ -1,4 +1,4 @@
-name: 'Sync Fork [next]'
+name: 'Update Fork [master]'
 
 on:
   schedule:
@@ -8,14 +8,14 @@ on:
   workflow_dispatch:  # click the button on Github repo!
     inputs:
       sync_test_mode: # Adds a boolean option that appears during manual workflow run for easy test mode config
-        description: 'Fork Sync Test Mode'
+        description: 'Test Mode'
         type: boolean
         default: false
 
 jobs:
   pull_changes_from_upstream:
     runs-on: ubuntu-latest
-    name: Pull and sync latest commits from upstream repo
+    name: Pull latest commits from upstream repo
 
     steps:
     # REQUIRED step
@@ -24,6 +24,7 @@ jobs:
       uses: actions/checkout@v3
       with:
         # optional: set the branch to checkout,
+        ref:
         # sync action checks out your 'target_sync_branch' anyway
         # REQUIRED if your upstream repo is private (see wiki)
         persist-credentials: false
@@ -34,10 +35,10 @@ jobs:
       id: sync
       uses: aormsby/Fork-Sync-With-Upstream-action@v3.4.1
       with:
-        target_sync_branch: next
+        target_sync_branch: 'master'
         # REQUIRED 'target_repo_token' exactly like this!
         target_repo_token: ${{ secrets.GITHUB_TOKEN }}
-        upstream_sync_branch: next
+        upstream_sync_branch: 'master'
         upstream_sync_repo: ZPTXDev/Quaver
         upstream_repo_access_token: ${{ secrets.UPSTREAM_REPO_SECRET }}
 
