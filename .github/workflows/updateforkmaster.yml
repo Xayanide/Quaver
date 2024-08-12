@@ -13,9 +13,9 @@ on:
         default: false
 
 jobs:
-  sync_fork_to_upstream:
+  fork_sync_setup:
     runs-on: ubuntu-latest
-    name: Sync fork to upstream
+    name: Fork Sync Setup
 
     steps:
     # REQUIRED step

@@ -10,9 +10,9 @@ on:
   workflow_dispatch:
 
 jobs:
-  branch_merge:
+  branch_merge_setup:
     runs-on: ubuntu-latest
-    name: Merge source into target branch
+    name: Direct Merge Setup
 
     steps:
       - name: Merge branch 'next' into next-replit
