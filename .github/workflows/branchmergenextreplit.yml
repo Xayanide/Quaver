@@ -1,4 +1,4 @@
-name: Merge Branch [next -> next-replit]
+name: Branch Merge [next -> next-replit]
 
 on:
   push:
@@ -6,15 +6,16 @@ on:
   schedule:
   # At 5 minutes past the hour
     - cron: '5 * * * *'
+  # click the button on Github repo!
   workflow_dispatch:
 
 jobs:
-  merge_source_branch_into_target_branch:
+  branch_merge:
     runs-on: ubuntu-latest
-    name: Merge source into target
+    name: Merge source into target branch
 
     steps:
-      - name: Merge branch
+      - name: Merge branch 'next' into next-replit
         uses: tukasz/direct-merge-action@master
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
