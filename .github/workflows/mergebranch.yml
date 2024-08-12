@@ -11,7 +11,7 @@ on:
 jobs:
   merge_source_branch_into_target_branch:
     runs-on: ubuntu-latest
-    name: Merge source branch into target branch
+    name: Merge source into target
 
     steps:
       - name: Merge branch
