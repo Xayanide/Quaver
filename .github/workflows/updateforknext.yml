@@ -15,16 +15,16 @@ on:
 jobs:
   pull_changes_from_upstream:
     runs-on: ubuntu-latest
-    name: Pull and sync latest commits from upstream repo
+    name: Update fork to upstream repo
 
     steps:
     # REQUIRED step
     # Step 1: run a standard checkout action, provided by github
-    - name: Checkout target repo
+    - name: Checkout target branch
       uses: actions/checkout@v3
       with:
         # optional: set the branch to checkout,
-        ref:
+        ref: next
         # sync action checks out your 'target_sync_branch' anyway
         # REQUIRED if your upstream repo is private (see wiki)
         persist-credentials: false
@@ -35,10 +35,10 @@ jobs:
       id: sync
       uses: aormsby/Fork-Sync-With-Upstream-action@v3.4.1
       with:
-        target_sync_branch: 'next'
+        target_sync_branch: next
         # REQUIRED 'target_repo_token' exactly like this!
         target_repo_token: ${{ secrets.GITHUB_TOKEN }}
-        upstream_sync_branch: 'next'
+        upstream_sync_branch: next
         upstream_sync_repo: ZPTXDev/Quaver
         upstream_repo_access_token: ${{ secrets.UPSTREAM_REPO_SECRET }}
 
