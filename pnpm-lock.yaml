@@ -44,8 +44,8 @@ importers:
         specifier: ^4.2.0
         version: 4.2.0
       discord-api-types:
-        specifier: ^0.37.94
-        version: 0.37.94
+        specifier: ^0.37.95
+        version: 0.37.95
       discord.js:
         specifier: ^14.15.3
         version: 14.15.3
@@ -80,8 +80,8 @@ importers:
         specifier: ^4.7.5
         version: 4.7.5
       undici:
-        specifier: ^6.19.7
-        version: 6.19.7
+        specifier: ^6.19.8
+        version: 6.19.8
       wanakana:
         specifier: ^5.3.1
         version: 5.3.1
@@ -871,8 +871,8 @@ packages:
   discord-api-types@0.37.83:
     resolution: {integrity: sha512-urGGYeWtWNYMKnYlZnOnDHm8fVRffQs3U0SpE8RHeiuLKb/u92APS8HoQnPTFbnXmY1vVnXjXO4dOxcAn3J+DA==}
 
-  discord-api-types@0.37.94:
-    resolution: {integrity: sha512-gD1CDdsnXNTLGwvVoxCXMlM4L2NXUaB227h5z2F0oQ0VkRFi/BzSOTPuOoieq8czUMl67Z+rVstKNVcPFom6fw==}
+  discord-api-types@0.37.95:
+    resolution: {integrity: sha512-EuEO4vu8+rtWbrVufDtYFH5dm40Wo55jBWEdwyvav1r3XiM51PzAnZ/BUaHmfqYLEooJs+3Tn56o/Vnp1qLMJg==}
 
   discord.js@14.15.3:
     resolution: {integrity: sha512-/UJDQO10VuU6wQPglA4kz2bw2ngeeSbogiIPx/TsnctfzV/tNf+q+i1HlgtX1OGpeOBpJH9erZQNO5oRM2uAtQ==}
@@ -1928,8 +1928,8 @@ packages:
     resolution: {integrity: sha512-Q2rtqmZWrbP8nePMq7mOJIN98M0fYvSgV89vwl/BQRT4mDOeY2GXZngfGpcBBhtky3woM7G24wZV3Q304Bv6cw==}
     engines: {node: '>=18.0'}
 
-  undici@6.19.7:
-    resolution: {integrity: sha512-HR3W/bMGPSr90i8AAp2C4DM3wChFdJPLrWYpIS++LxS8K+W535qftjt+4MyjNYHeWabMj1nvtmLIi7l++iq91A==}
+  undici@6.19.8:
+    resolution: {integrity: sha512-U8uCCl2x9TK3WANvmBavymRzxbfFYG+tAu+fgx3zxQy3qdagQqBLwJVrdyO1TBfUXvfKveMKJZhpvUYoOjM+4g==}
     engines: {node: '>=18.17'}
 
   unique-filename@1.1.1:
@@ -2774,7 +2774,7 @@ snapshots:
 
   discord-api-types@0.37.83: {}
 
-  discord-api-types@0.37.94: {}
+  discord-api-types@0.37.95: {}
 
   discord.js@14.15.3:
     dependencies:
@@ -4018,7 +4018,7 @@ snapshots:
 
   undici@6.13.0: {}
 
-  undici@6.19.7: {}
+  undici@6.19.8: {}
 
   unique-filename@1.1.1:
     dependencies:

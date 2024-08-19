@@ -13,7 +13,7 @@
     "@napi-rs/pinyin": "^1.7.5",
     "@zptxdev/zptx-lib": "^1.1.0",
     "crypto-js": "^4.2.0",
-    "discord-api-types": "^0.37.94",
+    "discord-api-types": "^0.37.95",
     "discord.js": "^14.15.3",
     "express": "^4.19.2",
     "genversion": "^3.2.0",
@@ -25,7 +25,7 @@
     "lavalink-protocol": "^1.0.2",
     "lodash-es": "^4.17.21",
     "socket.io": "^4.7.5",
-    "undici": "^6.19.7",
+    "undici": "^6.19.8",
     "wanakana": "^5.3.1",
     "winston": "^3.14.2",
     "winston-loki": "^6.1.2"
