@@ -6,15 +6,15 @@
     "node": ">=20"
   },
   "dependencies": {
-    "@discordjs/rest": "^2.4.0",
+    "@discordjs/rest": "^2.4.2",
     "@keyv/sqlite": "^3.6.7",
     "@lavaclient/plugin-effects": "^1.0.0-rc.2",
     "@lavaclient/plugin-queue": "^0.0.1",
     "@napi-rs/pinyin": "^1.7.5",
     "@zptxdev/zptx-lib": "^1.1.0",
     "crypto-js": "^4.2.0",
-    "discord-api-types": "^0.37.111",
-    "discord.js": "^14.16.3",
+    "discord-api-types": "^0.37.118",
+    "discord.js": "^14.17.3",
     "express": "^4.21.2",
     "genversion": "^3.2.0",
     "hangul-romanization": "^1.0.1",
@@ -41,7 +41,7 @@
     "rimraf": "^5.0.8",
     "tsc-alias": "^1.8.10",
     "tsconfig-paths": "^4.2.0",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.3"
   },
   "main": "dist/main.js",
   "scripts": {
