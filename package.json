@@ -6,7 +6,7 @@
     "node": ">=20"
   },
   "dependencies": {
-    "@discordjs/rest": "^2.4.2",
+    "@discordjs/rest": "^2.4.3",
     "@keyv/sqlite": "^3.6.7",
     "@lavaclient/plugin-effects": "^1.0.0-rc.2",
     "@lavaclient/plugin-queue": "^0.0.1",
@@ -14,7 +14,7 @@
     "@zptxdev/zptx-lib": "^1.1.0",
     "crypto-js": "^4.2.0",
     "discord-api-types": "^0.37.119",
-    "discord.js": "^14.17.3",
+    "discord.js": "^14.18.0",
     "express": "^4.21.2",
     "genversion": "^3.2.0",
     "hangul-romanization": "^1.0.1",
